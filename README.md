@@ -23,8 +23,15 @@ Na pasta do repositório:
 
 ```bash
 npm install
+cp .env.example .env.local
 npm run dev
 ```
+
+## Firebase (dev)
+
+Copie `.env.example` para `.env.local` e preencha as chaves **públicas** do projeto Firebase de desenvolvimento. Sem essas variáveis a app não chama um projeto indefinido e avisa que a configuração está em falta.
+
+Papéis em `usuarios/{uid}.papel`: `editor` ou `leitor`. Sem esse documento, o login não abre área protegida.
 
 ## Licença
 
