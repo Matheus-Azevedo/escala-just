@@ -2,7 +2,7 @@
 
 Aplicação web para a **escala semanal do plantão normal** dos oficiais de justiça (Comarca de Santa Rita, PB).
 
-Fundação no ar. Login de teste: `editor@escala-just.dev` e `leitor@escala-just.dev` (senhas só no Auth, não no git).
+Para correr localmente: copie `.env.example` para `.env.local` com as chaves do projeto Firebase de desenvolvimento. Sem essas variáveis a app avisa que a configuração está em falta. Não commitar `.env.local`.
 
 ## Stack
 
@@ -29,16 +29,11 @@ npm run dev
 
 ## Firebase (dev)
 
-Projeto **`escala-just-dev`** no plano Spark. Este repositório aponta só para **dev**; produção será outro projeto Firebase, quando existir.
-
-Hosting: https://escala-just-dev.web.app  
-(espelho: https://escala-just-dev.firebaseapp.com)
-
-Copie `.env.example` para `.env.local` e preencha as chaves **públicas** do projeto. Sem essas variáveis a app avisa que a configuração está em falta. Não commitar `.env.local`.
+Este repositório aponta só para o projeto Firebase de **desenvolvimento**; produção será outro projeto, quando existir.
 
 Papéis em `usuarios/{uid}.papel`: `editor` ou `leitor`. Sem esse documento, o login não abre área protegida.
 
-Firestore `(default)`, edição Standard, região `southamerica-east1` (São Paulo).
+URL de Hosting, logins de teste e região do Firestore ficam no caderno privado (`escala-just-produto`), não neste README.
 
 ## Licença
 
