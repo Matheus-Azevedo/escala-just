@@ -1,5 +1,6 @@
 import { type FormEvent, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/auth-context'
@@ -23,7 +24,6 @@ export function LoginPage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
@@ -37,12 +37,11 @@ export function LoginPage() {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setError(null)
     setSubmitting(true)
     try {
       await login(email, password)
     } catch (cause) {
-      setError(mensagemErro(cause))
+      toast.error(mensagemErro(cause))
     } finally {
       setSubmitting(false)
     }
@@ -55,7 +54,7 @@ export function LoginPage() {
         Autenticação da central e dos oficiais (T-01).
       </p>
       {state.status === 'no-profile' ? (
-        <p className="text-sm text-destructive" role="alert">
+        <p className="text-sm text-muted-foreground" role="status">
           A sessão existe, mas o perfil não está configurado.
         </p>
       ) : null}
@@ -86,13 +85,12 @@ export function LoginPage() {
             onChange={(event) => setPassword(event.target.value)}
           />
         </label>
-        {error ? (
-          <p className="text-sm text-destructive" role="alert">
-            {error}
-          </p>
-        ) : null}
-        <Button type="submit" disabled={submitting || state.status === 'unconfigured'}>
-          {submitting ? 'A entrar…' : 'Entrar'}
+        <Button
+          type="submit"
+          pending={submitting}
+          disabled={state.status === 'unconfigured'}
+        >
+          Entrar
         </Button>
       </form>
     </section>

@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 
 import { AppTree } from '../App'
 import { createMemoryAuthService } from '@/services/auth'
+import { createMemoryOficiaisService } from '@/services/oficiais'
 
 function renderRota(
   path: string,
@@ -13,7 +14,10 @@ function renderRota(
   const authService = createMemoryAuthService(auth)
   return render(
     <MemoryRouter initialEntries={[path]}>
-      <AppTree authService={authService} />
+      <AppTree
+        authService={authService}
+        oficiaisService={createMemoryOficiaisService()}
+      />
     </MemoryRouter>,
   )
 }
@@ -78,8 +82,33 @@ describe('guardas de rota', () => {
     await user.type(document.getElementById('login-password') as HTMLInputElement, 'errada')
     await user.click(screen.getAllByRole('button', { name: /^entrar$/i })[0])
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/credenciais inválidas/i)
+    expect(await screen.findByText(/credenciais inválidas/i)).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /entrar/i })).toBeInTheDocument()
+  })
+
+  it('leitor em /editor/oficiais vai para /leitor', async () => {
+    renderRota('/editor/oficiais', {
+      configured: true,
+      session: { uid: 'u4', email: 'leitor@exemplo.com' },
+      papel: 'leitor',
+    })
+    expect(
+      await screen.findByRole('heading', { name: /consulta da escala/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: /cadastro de oficiais/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('editor autenticado vê T-04 em /editor/oficiais', async () => {
+    renderRota('/editor/oficiais', {
+      configured: true,
+      session: { uid: 'u5', email: 'editor@exemplo.com' },
+      papel: 'editor',
+    })
+    expect(
+      await screen.findByRole('heading', { name: /cadastro de oficiais/i }),
+    ).toBeInTheDocument()
   })
 
   it('sem env mostra que a configuração está em falta', () => {

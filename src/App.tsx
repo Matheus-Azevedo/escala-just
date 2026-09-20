@@ -5,11 +5,15 @@ import { AppShell } from '@/components/app-shell'
 import { HomeRedirect } from '@/components/home-redirect'
 import { RequireAuth } from '@/components/require-auth'
 import { Button } from '@/components/ui/button'
+import { Toaster } from '@/components/ui/sonner'
 import { AuthProvider, useAuth } from '@/hooks/auth-context'
+import { OficiaisProvider } from '@/hooks/oficiais-context'
 import { EditorPage } from '@/pages/editor-page'
 import { LeitorPage } from '@/pages/leitor-page'
 import { LoginPage } from '@/pages/login-page'
+import { OficiaisPage } from '@/pages/oficiais-page'
 import type { AuthService } from '@/services/auth'
+import type { OficiaisService } from '@/services/oficiais'
 
 export function AppRoutes() {
   return (
@@ -20,6 +24,14 @@ export function AppRoutes() {
         element={
           <RequireAuth papel="editor">
             <EditorPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/editor/oficiais"
+        element={
+          <RequireAuth papel="editor">
+            <OficiaisPage />
           </RequireAuth>
         }
       />
@@ -63,12 +75,21 @@ function AuthenticatedShell({ children }: { children: ReactNode }) {
   )
 }
 
-export function AppTree({ authService }: { authService?: AuthService }) {
+export function AppTree({
+  authService,
+  oficiaisService,
+}: {
+  authService?: AuthService
+  oficiaisService?: OficiaisService
+}) {
   return (
     <AuthProvider service={authService}>
-      <AuthenticatedShell>
-        <AppRoutes />
-      </AuthenticatedShell>
+      <OficiaisProvider service={oficiaisService}>
+        <AuthenticatedShell>
+          <AppRoutes />
+        </AuthenticatedShell>
+        <Toaster />
+      </OficiaisProvider>
     </AuthProvider>
   )
 }
