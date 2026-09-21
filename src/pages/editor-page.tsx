@@ -1,6 +1,4 @@
-import { Link } from 'react-router'
-
-import { Button } from '@/components/ui/button'
+import { EditorMenu } from '@/components/editor-menu'
 
 export function EditorPage() {
   return (
@@ -10,12 +8,7 @@ export function EditorPage() {
         Escolha o que pretende gerir. A criação de semanas e o cadastro ficam
         nas páginas seguintes.
       </p>
-      <Button asChild variant="outline">
-        <Link to="/editor/semanas">Semanas</Link>
-      </Button>
-      <Button asChild variant="outline">
-        <Link to="/editor/oficiais">Cadastro de oficiais</Link>
-      </Button>
+      <EditorMenu />
     </section>
   )
 }

@@ -1,7 +1,7 @@
 import { type FormEvent, useEffect, useState } from 'react'
-import { Link } from 'react-router'
 import { toast } from 'sonner'
 
+import { editorNavHover, EditorNavButton } from '@/components/editor-menu'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
@@ -194,6 +194,7 @@ export function OficiaisPage() {
                   type="button"
                   size="sm"
                   variant="outline"
+                  className={editorNavHover}
                   disabled={ocupado}
                   onClick={() => {
                     setEditandoId(oficial.id)
@@ -219,9 +220,7 @@ export function OficiaisPage() {
         </ul>
       ) : null}
 
-      <Button asChild variant="outline">
-        <Link to="/editor">Voltar</Link>
-      </Button>
+      <EditorNavButton to="/editor">Voltar</EditorNavButton>
     </section>
   )
 }

@@ -1,7 +1,8 @@
 import { type FormEvent, useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
 
+import { EditorNavButton } from '@/components/editor-menu'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
@@ -196,9 +197,7 @@ export function SemanaPage() {
         </Button>
       </form>
 
-      <Button asChild variant="outline">
-        <Link to="/editor/semanas">Voltar às semanas</Link>
-      </Button>
+      <EditorNavButton to="/editor/semanas">Voltar às semanas</EditorNavButton>
     </section>
   )
 }

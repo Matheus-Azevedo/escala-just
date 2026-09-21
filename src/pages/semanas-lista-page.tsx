@@ -1,7 +1,7 @@
 import { type FormEvent, useEffect, useState } from 'react'
-import { Link } from 'react-router'
 import { toast } from 'sonner'
 
+import { EditorNavButton } from '@/components/editor-menu'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -140,9 +140,9 @@ export function SemanasListaPage() {
                 <p className="text-xs text-muted-foreground">{semana.estado}</p>
               </div>
               <div className="flex gap-2">
-                <Button asChild size="sm" variant="outline">
-                  <Link to={`/editor/semanas/${semana.id}`}>Parâmetros</Link>
-                </Button>
+                <EditorNavButton size="sm" to={`/editor/semanas/${semana.id}`}>
+                  Parâmetros
+                </EditorNavButton>
                 {semana.estado === 'rascunho' ? (
                   <Button
                     type="button"
@@ -161,9 +161,7 @@ export function SemanasListaPage() {
         </ul>
       ) : null}
 
-      <Button asChild variant="outline">
-        <Link to="/editor">Voltar</Link>
-      </Button>
+      <EditorNavButton to="/editor">Voltar</EditorNavButton>
     </section>
   )
 }

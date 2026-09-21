@@ -77,7 +77,12 @@ function AuthenticatedShell({ children }: { children: ReactNode }) {
       loading={loading}
       headerAction={
         state.status === 'ready' || state.status === 'no-profile' ? (
-          <Button type="button" variant="outline" onClick={() => void logout()}>
+          <Button
+            type="button"
+            variant="outline"
+            className="hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
+            onClick={() => void logout()}
+          >
             Sair
           </Button>
         ) : null
