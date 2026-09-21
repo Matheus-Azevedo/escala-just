@@ -22,9 +22,12 @@ import { getFirebaseDb } from './firebase'
 const COLECAO = 'oficiais'
 
 export class OficiaisValidacaoError extends Error {
-  constructor(public readonly codigo: 'nome-vazio' | 'nome-duplicado' | 'teto-24') {
+  readonly codigo: 'nome-vazio' | 'nome-duplicado' | 'teto-24'
+
+  constructor(codigo: 'nome-vazio' | 'nome-duplicado' | 'teto-24') {
     super(mensagemOficial(codigo))
     this.name = 'OficiaisValidacaoError'
+    this.codigo = codigo
   }
 }
 
