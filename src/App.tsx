@@ -8,12 +8,16 @@ import { Button } from '@/components/ui/button'
 import { Toaster } from '@/components/ui/sonner'
 import { AuthProvider, useAuth } from '@/hooks/auth-context'
 import { OficiaisProvider } from '@/hooks/oficiais-context'
+import { SemanasProvider } from '@/hooks/semanas-context'
 import { EditorPage } from '@/pages/editor-page'
 import { LeitorPage } from '@/pages/leitor-page'
 import { LoginPage } from '@/pages/login-page'
 import { OficiaisPage } from '@/pages/oficiais-page'
+import { SemanaPage } from '@/pages/semana-page'
+import { SemanasListaPage } from '@/pages/semanas-lista-page'
 import type { AuthService } from '@/services/auth'
 import type { OficiaisService } from '@/services/oficiais'
+import type { SemanasService } from '@/services/semanas'
 
 export function AppRoutes() {
   return (
@@ -32,6 +36,22 @@ export function AppRoutes() {
         element={
           <RequireAuth papel="editor">
             <OficiaisPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/editor/semanas"
+        element={
+          <RequireAuth papel="editor">
+            <SemanasListaPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/editor/semanas/:id"
+        element={
+          <RequireAuth papel="editor">
+            <SemanaPage />
           </RequireAuth>
         }
       />
@@ -78,17 +98,21 @@ function AuthenticatedShell({ children }: { children: ReactNode }) {
 export function AppTree({
   authService,
   oficiaisService,
+  semanasService,
 }: {
   authService?: AuthService
   oficiaisService?: OficiaisService
+  semanasService?: SemanasService
 }) {
   return (
     <AuthProvider service={authService}>
       <OficiaisProvider service={oficiaisService}>
-        <AuthenticatedShell>
-          <AppRoutes />
-        </AuthenticatedShell>
-        <Toaster />
+        <SemanasProvider service={semanasService}>
+          <AuthenticatedShell>
+            <AppRoutes />
+          </AuthenticatedShell>
+          <Toaster />
+        </SemanasProvider>
       </OficiaisProvider>
     </AuthProvider>
   )

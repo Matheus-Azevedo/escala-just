@@ -1,4 +1,5 @@
 import { type FormEvent, useEffect, useState } from 'react'
+import { Link } from 'react-router'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -217,6 +218,10 @@ export function OficiaisPage() {
           ))}
         </ul>
       ) : null}
+
+      <Button asChild variant="outline">
+        <Link to="/editor">Voltar</Link>
+      </Button>
     </section>
   )
 }
