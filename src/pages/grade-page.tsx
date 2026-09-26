@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -9,6 +10,8 @@ import { usePermutasService } from '@/hooks/permutas-context'
 import {
   diasUteisDaSemana,
   formatarDiaBr,
+  oficiaisElegiveisParaCelula,
+  type Ausencia,
   type CelulaGrade,
   type Oficial,
   type SemanaEscala,
@@ -45,18 +48,22 @@ export function GradeSemana({ semana }: { semana: SemanaEscala }) {
   const celulasServico = useCelulasService()
 
   const [oficiais, setOficiais] = useState<Oficial[]>([])
+  const [ausencias, setAusencias] = useState<Ausencia[]>([])
   const [celulas, setCelulas] = useState<CelulaGrade[]>([])
   const [aGerar, setAGerar] = useState(false)
+  const [ajustandoId, setAjustandoId] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelado = false
     void Promise.all([
       oficiaisServico.listar(),
+      ausenciasServico.listar(),
       celulasServico.listarDaSemana(semana.id),
     ])
-      .then(([listaOficiais, listaCelulas]) => {
+      .then(([listaOficiais, listaAusencias, listaCelulas]) => {
         if (cancelado) return
         setOficiais(listaOficiais)
+        setAusencias(listaAusencias)
         setCelulas(listaCelulas)
       })
       .catch((cause: unknown) => {
@@ -67,7 +74,7 @@ export function GradeSemana({ semana }: { semana: SemanaEscala }) {
     return () => {
       cancelado = true
     }
-  }, [celulasServico, oficiaisServico, semana.id])
+  }, [ausenciasServico, celulasServico, oficiaisServico, semana.id])
 
   const dias = useMemo(() => diasUteisDaSemana(semana), [semana])
 
@@ -86,6 +93,7 @@ export function GradeSemana({ semana }: { semana: SemanaEscala }) {
         permutas,
       })
       setOficiais(listaOficiais)
+      setAusencias(ausencias)
       setCelulas(resultado.celulas)
       if (resultado.avisos.length > 0) {
         toast.message(resultado.avisos.join(' '))
@@ -99,12 +107,35 @@ export function GradeSemana({ semana }: { semana: SemanaEscala }) {
     }
   }
 
+  async function ajustar(celula: CelulaGrade, oficialId: string) {
+    if (oficialId === celula.oficialId) return
+    setAjustandoId(celula.id)
+    try {
+      const actualizado = await celulasServico.ajustar({
+        celulaId: celula.id,
+        oficialId,
+        oficiais,
+        ausencias,
+      })
+      setCelulas((lista) =>
+        lista.map((item) => (item.id === actualizado.id ? actualizado : item)),
+      )
+      toast.success('Célula actualizada.')
+    } catch (cause) {
+      toast.error(cause instanceof Error ? cause.message : 'Não foi possível ajustar a célula.')
+    } finally {
+      setAjustandoId(null)
+    }
+  }
+
   return (
     <div className="flex flex-col gap-3">
       <h3 className="text-lg font-semibold">Grade da semana</h3>
       <p className="text-sm text-muted-foreground">
         Três titulares e dois suplentes por dia.
         {semana.exibirHorarioPlantao ? ' Plantão normal: 7h às 13h.' : ''}
+        {' '}
+        Recalcular substitui todos os ajustes manuais desta semana.
       </p>
 
       <Button type="button" pending={aGerar} disabled={aGerar} onClick={() => void gerar()}>
@@ -129,9 +160,45 @@ export function GradeSemana({ semana }: { semana: SemanaEscala }) {
                 <th className="px-2 py-2 font-medium">{linha.rotulo}</th>
                 {dias.map((dia) => {
                   const celula = celulaEm(celulas, dia, linha.papel, linha.posicao)
+                  if (!celula) {
+                    return (
+                      <td key={dia} className="px-2 py-2">
+                        {nomeDoOficial(oficiais, '')}
+                      </td>
+                    )
+                  }
+                  const elegiveis = oficiaisElegiveisParaCelula({
+                    celulas,
+                    celula,
+                    oficiais,
+                    ausencias,
+                  })
+                  const aAjustar = ajustandoId === celula.id
                   return (
                     <td key={dia} className="px-2 py-2">
-                      {nomeDoOficial(oficiais, celula?.oficialId ?? '')}
+                      <div className="relative">
+                        <select
+                          className={`w-full min-w-[7rem] rounded-md border bg-background px-1 py-1${aAjustar ? ' text-transparent' : ''}`}
+                          aria-label={`${linha.rotulo} em ${formatarDiaBr(dia)}`}
+                          aria-busy={aAjustar || undefined}
+                          value={celula.oficialId}
+                          disabled={aAjustar}
+                          onChange={(evento) => void ajustar(celula, evento.target.value)}
+                        >
+                          <option value="">—</option>
+                          {elegiveis.map((oficial) => (
+                            <option key={oficial.id} value={oficial.id}>
+                              {oficial.nome}
+                            </option>
+                          ))}
+                        </select>
+                        {aAjustar ? (
+                          <Loader2
+                            className="pointer-events-none absolute top-1/2 left-1/2 size-4 -translate-x-1/2 -translate-y-1/2 animate-spin"
+                            aria-hidden
+                          />
+                        ) : null}
+                      </div>
                     </td>
                   )
                 })}

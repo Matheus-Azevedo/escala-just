@@ -10,7 +10,7 @@ import { createMemoryAusenciasService } from '@/services/ausencias'
 import { createMemoryCelulasService } from '@/services/celulas'
 import { createMemoryPermutasService } from '@/services/permutas'
 import { createMemorySemanasService } from '@/services/semanas'
-import type { SemanaEscala } from '@/lib/escala'
+import type { Oficial, SemanaEscala } from '@/lib/escala'
 
 const semanaMemoria: SemanaEscala = {
   id: 's1',
@@ -27,13 +27,14 @@ function renderRota(
   path: string,
   auth: Parameters<typeof createMemoryAuthService>[0],
   semanas: SemanaEscala[] = [],
+  oficiais: Oficial[] = [],
 ) {
   const authService = createMemoryAuthService(auth)
   return render(
     <MemoryRouter initialEntries={[path]}>
       <AppTree
         authService={authService}
-        oficiaisService={createMemoryOficiaisService()}
+        oficiaisService={createMemoryOficiaisService(oficiais)}
         semanasService={createMemorySemanasService(semanas)}
         ausenciasService={createMemoryAusenciasService()}
         permutasService={createMemoryPermutasService()}
@@ -261,6 +262,29 @@ describe('guardas de rota', () => {
     ).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /grade da semana/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^gerar$/i })).toBeInTheDocument()
+  })
+
+  it('editor vê select na grade depois de gerar', async () => {
+    const user = userEvent.setup()
+    const oficiais: Oficial[] = Array.from({ length: 8 }, (_, i) => ({
+      id: `o${i + 1}`,
+      nome: `Oficial ${i + 1}`,
+      foraDaRotacao: false,
+      ordemTitular: i + 1,
+      ordemSuplente: i + 1,
+    }))
+    renderRota(
+      '/editor/semanas/s1',
+      {
+        configured: true,
+        session: { uid: 'u7', email: 'editor@exemplo.com' },
+        papel: 'editor',
+      },
+      [semanaMemoria],
+      oficiais,
+    )
+    await user.click(await screen.findByRole('button', { name: /^gerar$/i }))
+    expect(await screen.findAllByRole('combobox')).not.toHaveLength(0)
   })
 
   it('editor em /editor/semanas/:id/grade vai para os detalhes da semana', async () => {

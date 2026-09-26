@@ -2,13 +2,18 @@ import {
   addDoc,
   collection,
   deleteDoc,
+  doc,
+  getDoc,
   getDocs,
   query,
+  updateDoc,
   where,
 } from 'firebase/firestore'
 
 import {
   gerarSemana,
+  mensagemAjuste,
+  validarAjusteCelula,
   type Ausencia,
   type CelulaGrade,
   type Oficial,
@@ -22,6 +27,13 @@ import { getFirebaseDb } from './firebase'
 
 const COLECAO = 'celulas'
 
+export class CelulasValidacaoError extends Error {
+  constructor(mensagem: string) {
+    super(mensagem)
+    this.name = 'CelulasValidacaoError'
+  }
+}
+
 export type CelulasService = {
   listarDaSemana: (semanaId: string) => Promise<CelulaGrade[]>
   gerar: (entrada: {
@@ -30,6 +42,12 @@ export type CelulasService = {
     ausencias: Ausencia[]
     permutas: Permuta[]
   }) => Promise<ResultadoGeracao & { celulas: CelulaGrade[] }>
+  ajustar: (entrada: {
+    celulaId: string
+    oficialId: string
+    oficiais: Oficial[]
+    ausencias: Ausencia[]
+  }) => Promise<CelulaGrade>
 }
 
 function lerCelula(id: string, data: Record<string, unknown>): CelulaGrade {
@@ -66,6 +84,27 @@ async function substituirFirebase(semanaId: string, geradas: ResultadoGeracao['c
   return gravadas
 }
 
+function aplicarValidacao(
+  celulas: CelulaGrade[],
+  entrada: {
+    celulaId: string
+    oficialId: string
+    oficiais: Oficial[]
+    ausencias: Ausencia[]
+  },
+) {
+  const resultado = validarAjusteCelula({
+    celulas,
+    celulaId: entrada.celulaId,
+    oficialId: entrada.oficialId,
+    oficiais: entrada.oficiais,
+    ausencias: entrada.ausencias,
+  })
+  if (!resultado.ok) {
+    throw new CelulasValidacaoError(mensagemAjuste(resultado.erro))
+  }
+}
+
 export function createFirebaseCelulasService(): CelulasService {
   return {
     async listarDaSemana(semanaId) {
@@ -89,6 +128,20 @@ export function createFirebaseCelulasService(): CelulasService {
       const celulas = await substituirFirebase(entrada.semana.id, resultado.celulas)
       return { avisos: resultado.avisos, celulas }
     },
+    async ajustar(entrada) {
+      if (!isFirebaseConfigured()) {
+        throw new Error('Firebase não configurado.')
+      }
+      const snap = await getDoc(doc(getFirebaseDb(), COLECAO, entrada.celulaId))
+      if (!snap.exists()) {
+        throw new CelulasValidacaoError(mensagemAjuste('celula-inexistente'))
+      }
+      const actual = lerCelula(snap.id, snap.data())
+      const daSemana = await this.listarDaSemana(actual.semanaId)
+      aplicarValidacao(daSemana, entrada)
+      await updateDoc(snap.ref, { oficialId: entrada.oficialId })
+      return { ...actual, oficialId: entrada.oficialId }
+    },
   }
 }
 
@@ -109,6 +162,16 @@ export function createMemoryCelulasService(iniciais: CelulaGrade[] = []): Celula
       })
       itens = [...itens, ...celulas]
       return { avisos: resultado.avisos, celulas }
+    },
+    async ajustar(entrada) {
+      aplicarValidacao(itens, entrada)
+      const actual = itens.find((item) => item.id === entrada.celulaId)
+      if (!actual) {
+        throw new CelulasValidacaoError(mensagemAjuste('celula-inexistente'))
+      }
+      const actualizado = { ...actual, oficialId: entrada.oficialId }
+      itens = itens.map((item) => (item.id === actual.id ? actualizado : item))
+      return actualizado
     },
   }
 }

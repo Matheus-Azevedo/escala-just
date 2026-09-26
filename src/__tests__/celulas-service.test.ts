@@ -47,4 +47,48 @@ describe('serviço de células (memory)', () => {
     expect(segundo.celulas).toHaveLength(25)
     expect(await servico.listarDaSemana('s1')).toHaveLength(25)
   })
+
+  it('ajustar grava oficial válido', async () => {
+    const servico = createMemoryCelulasService()
+    const gerado = await servico.gerar({ semana, oficiais, ausencias: [], permutas: [] })
+    const alvo = gerado.celulas.find((item) => item.papel === 'titular' && item.posicao === 1)!
+    const suplentesDia = new Set(
+      gerado.celulas
+        .filter((item) => item.data === alvo.data && item.papel === 'suplente' && item.oficialId)
+        .map((item) => item.oficialId),
+    )
+    const livre = oficiais.find(
+      (oficial) => oficial.id !== alvo.oficialId && !suplentesDia.has(oficial.id),
+    )!
+    await servico.ajustar({
+      celulaId: alvo.id,
+      oficialId: livre.id,
+      oficiais,
+      ausencias: [],
+    })
+    const lista = await servico.listarDaSemana('s1')
+    expect(lista.find((item) => item.id === alvo.id)?.oficialId).toBe(livre.id)
+  })
+
+  it('ajustar recusa colisão RN-006', async () => {
+    const servico = createMemoryCelulasService()
+    const gerado = await servico.gerar({ semana, oficiais, ausencias: [], permutas: [] })
+    const titular = gerado.celulas.find(
+      (item) => item.data === '2026-09-14' && item.papel === 'titular' && item.posicao === 1,
+    )!
+    const suplente = gerado.celulas.find(
+      (item) => item.data === '2026-09-14' && item.papel === 'suplente' && item.posicao === 1,
+    )!
+    await expect(
+      servico.ajustar({
+        celulaId: suplente.id,
+        oficialId: titular.oficialId,
+        oficiais,
+        ausencias: [],
+      }),
+    ).rejects.toThrow(/titular e suplente/i)
+    const lista = await servico.listarDaSemana('s1')
+    expect(lista.find((item) => item.id === suplente.id)?.oficialId).toBe(suplente.oficialId)
+  })
 })
+

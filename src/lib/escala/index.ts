@@ -31,6 +31,12 @@ export {
   type ResultadoGeracao,
 } from './gerar'
 export {
+  mensagemAjuste,
+  oficiaisElegiveisParaCelula,
+  validarAjusteCelula,
+  type AjusteErro,
+} from './ajuste'
+export {
   ancoraValida,
   feriadoNoIntervalo,
   formatDia,
