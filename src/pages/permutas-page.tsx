@@ -145,7 +145,11 @@ export function PermutasPage() {
             id="permuta-afetado"
             className="h-8 rounded-lg border border-border bg-background px-2.5 text-sm"
             value={afetadoId}
-            onChange={(event) => setAfetadoId(event.target.value)}
+            onChange={(event) => {
+              const seguinte = event.target.value
+              setAfetadoId(seguinte)
+              if (seguinte && seguinte === substitutoId) setSubstitutoId('')
+            }}
           >
             <option value="">Escolher…</option>
             {oficiais.map((oficial) => (
@@ -164,11 +168,13 @@ export function PermutasPage() {
             onChange={(event) => setSubstitutoId(event.target.value)}
           >
             <option value="">Escolher…</option>
-            {oficiais.map((oficial) => (
-              <option key={oficial.id} value={oficial.id}>
-                {oficial.nome}
-              </option>
-            ))}
+            {oficiais
+              .filter((oficial) => oficial.id !== afetadoId)
+              .map((oficial) => (
+                <option key={oficial.id} value={oficial.id}>
+                  {oficial.nome}
+                </option>
+              ))}
           </select>
         </div>
         <div className="flex flex-col gap-1.5">
