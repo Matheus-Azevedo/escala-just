@@ -41,7 +41,7 @@ export type CelulasService = {
     oficiais: Oficial[]
     ausencias: Ausencia[]
     permutas: Permuta[]
-  }) => Promise<ResultadoGeracao & { celulas: CelulaGrade[] }>
+  }) => Promise<{ avisos: ResultadoGeracao['avisos']; celulas: CelulaGrade[] }>
   ajustar: (entrada: {
     celulaId: string
     oficialId: string
