@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router'
+import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router'
 
 import { AppShell } from '@/components/app-shell'
 import { HomeRedirect } from '@/components/home-redirect'
@@ -9,6 +9,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { AuthProvider, useAuth } from '@/hooks/auth-context'
 import { OficiaisProvider } from '@/hooks/oficiais-context'
 import { AusenciasProvider } from '@/hooks/ausencias-context'
+import { CelulasProvider } from '@/hooks/celulas-context'
 import { PermutasProvider } from '@/hooks/permutas-context'
 import { SemanasProvider } from '@/hooks/semanas-context'
 import { EditorPage } from '@/pages/editor-page'
@@ -22,8 +23,14 @@ import { SemanasListaPage } from '@/pages/semanas-lista-page'
 import type { AuthService } from '@/services/auth'
 import type { OficiaisService } from '@/services/oficiais'
 import type { AusenciasService } from '@/services/ausencias'
+import type { CelulasService } from '@/services/celulas'
 import type { PermutasService } from '@/services/permutas'
 import type { SemanasService } from '@/services/semanas'
+
+function RedirecionarGradeParaDetalhes() {
+  const { id } = useParams<{ id: string }>()
+  return <Navigate to={id ? `/editor/semanas/${id}` : '/editor/semanas'} replace />
+}
 
 export function AppRoutes() {
   return (
@@ -58,6 +65,14 @@ export function AppRoutes() {
         element={
           <RequireAuth papel="editor">
             <SemanaPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/editor/semanas/:id/grade"
+        element={
+          <RequireAuth papel="editor">
+            <RedirecionarGradeParaDetalhes />
           </RequireAuth>
         }
       />
@@ -128,12 +143,14 @@ export function AppTree({
   semanasService,
   ausenciasService,
   permutasService,
+  celulasService,
 }: {
   authService?: AuthService
   oficiaisService?: OficiaisService
   semanasService?: SemanasService
   ausenciasService?: AusenciasService
   permutasService?: PermutasService
+  celulasService?: CelulasService
 }) {
   return (
     <AuthProvider service={authService}>
@@ -141,10 +158,12 @@ export function AppTree({
         <SemanasProvider service={semanasService}>
           <AusenciasProvider service={ausenciasService}>
             <PermutasProvider service={permutasService}>
-              <AuthenticatedShell>
-                <AppRoutes />
-              </AuthenticatedShell>
-              <Toaster />
+              <CelulasProvider service={celulasService}>
+                <AuthenticatedShell>
+                  <AppRoutes />
+                </AuthenticatedShell>
+                <Toaster />
+              </CelulasProvider>
             </PermutasProvider>
           </AusenciasProvider>
         </SemanasProvider>

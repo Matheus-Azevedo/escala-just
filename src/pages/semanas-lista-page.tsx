@@ -136,7 +136,7 @@ export function SemanasListaPage() {
               </div>
               <div className="flex gap-2">
                 <EditorNavButton size="sm" to={`/editor/semanas/${semana.id}`}>
-                  Parâmetros
+                  Detalhes
                 </EditorNavButton>
                 {semana.estado === 'rascunho' ? (
                   <Button

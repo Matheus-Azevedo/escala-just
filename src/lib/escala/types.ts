@@ -95,6 +95,17 @@ export type PermutaErro =
   | 'papel-invalido'
   | 'intervalo-invalido'
 
+export type PapelCelula = 'titular' | 'suplente'
+
+export type CelulaGrade = {
+  id: string
+  semanaId: string
+  data: string
+  papel: PapelCelula
+  posicao: number
+  oficialId: string
+}
+
 export const TETO_ROTACAO = 24
 
 export function isPapel(value: unknown): value is Papel {

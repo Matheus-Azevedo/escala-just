@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSemanasService } from '@/hooks/semanas-context'
 import { formatarDiaBr, formatarIntervaloBr, type SemanaEscala } from '@/lib/escala'
+import { GradeSemana } from '@/pages/grade-page'
 import { SemanasValidacaoError } from '@/services/semanas'
 
 function mensagemErro(cause: unknown): string {
@@ -104,7 +105,7 @@ export function SemanaPage() {
 
   if (!pronta && mostrarEsqueleto) {
     return (
-      <section className="mx-auto flex w-full max-w-2xl flex-col gap-3" aria-busy="true">
+      <section className="mx-auto flex w-full max-w-5xl flex-col gap-3" aria-busy="true">
         <Skeleton className="h-7 w-56" />
         <Skeleton className="h-24 w-full" />
       </section>
@@ -116,12 +117,11 @@ export function SemanaPage() {
   }
 
   return (
-    <section className="mx-auto flex w-full max-w-2xl flex-col gap-4">
+    <section className="mx-auto flex w-full max-w-5xl flex-col gap-4">
       <h2 className="text-xl font-semibold">Parâmetros da semana</h2>
       <p className="text-sm text-muted-foreground">
         T-05: {formatarIntervaloBr(semana.dataInicio, semana.dataFim)}. Feriados só para
         exibição.
-        Sem gerar a grade.
       </p>
 
       <form className="flex flex-col gap-3 rounded-lg border p-3" onSubmit={onSubmit}>
@@ -193,6 +193,8 @@ export function SemanaPage() {
           Guardar
         </Button>
       </form>
+
+      <GradeSemana semana={semana} />
 
       <EditorNavButton to="/editor/semanas">Voltar às semanas</EditorNavButton>
     </section>

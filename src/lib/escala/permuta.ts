@@ -1,8 +1,14 @@
 import { intervaloAusenciaValido } from './ausencia'
 import { parseDia } from './semana'
-import type { PapelPermuta, Permuta, PermutaDraft, PermutaErro } from './types'
+import type {
+  PapelCelula,
+  PapelPermuta,
+  Permuta,
+  PermutaDraft,
+  PermutaErro,
+} from './types'
 
-export type PapelCelula = 'titular' | 'suplente'
+export type { PapelCelula }
 
 export function isPapelPermuta(valor: unknown): valor is PapelPermuta {
   return valor === 'titular' || valor === 'suplente' || valor === 'ambos'

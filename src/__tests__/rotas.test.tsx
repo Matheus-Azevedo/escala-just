@@ -7,6 +7,7 @@ import { AppTree } from '../App'
 import { createMemoryAuthService } from '@/services/auth'
 import { createMemoryOficiaisService } from '@/services/oficiais'
 import { createMemoryAusenciasService } from '@/services/ausencias'
+import { createMemoryCelulasService } from '@/services/celulas'
 import { createMemoryPermutasService } from '@/services/permutas'
 import { createMemorySemanasService } from '@/services/semanas'
 import type { SemanaEscala } from '@/lib/escala'
@@ -36,6 +37,7 @@ function renderRota(
         semanasService={createMemorySemanasService(semanas)}
         ausenciasService={createMemoryAusenciasService()}
         permutasService={createMemoryPermutasService()}
+        celulasService={createMemoryCelulasService()}
       />
     </MemoryRouter>,
   )
@@ -226,7 +228,25 @@ describe('guardas de rota', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('editor autenticado vê T-05 em /editor/semanas/:id', async () => {
+  it('leitor em /editor/semanas/:id/grade vai para /leitor', async () => {
+    renderRota(
+      '/editor/semanas/s1/grade',
+      {
+        configured: true,
+        session: { uid: 'u8', email: 'leitor@exemplo.com' },
+        papel: 'leitor',
+      },
+      [semanaMemoria],
+    )
+    expect(
+      await screen.findByRole('heading', { name: /consulta da escala/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: /grade da semana/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('editor autenticado vê T-05 e a grade em /editor/semanas/:id', async () => {
     renderRota(
       '/editor/semanas/s1',
       {
@@ -239,6 +259,24 @@ describe('guardas de rota', () => {
     expect(
       await screen.findByRole('heading', { name: /parâmetros da semana/i }),
     ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /grade da semana/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^gerar$/i })).toBeInTheDocument()
+  })
+
+  it('editor em /editor/semanas/:id/grade vai para os detalhes da semana', async () => {
+    renderRota(
+      '/editor/semanas/s1/grade',
+      {
+        configured: true,
+        session: { uid: 'u9', email: 'editor@exemplo.com' },
+        papel: 'editor',
+      },
+      [semanaMemoria],
+    )
+    expect(
+      await screen.findByRole('heading', { name: /parâmetros da semana/i }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /grade da semana/i })).toBeInTheDocument()
   })
 
   it('sem env mostra que a configuração está em falta', () => {

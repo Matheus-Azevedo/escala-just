@@ -24,6 +24,13 @@ export {
   validarEscritaPermuta,
 } from './permuta'
 export {
+  conflitoTitularSuplenteNoDia,
+  diasUteisDaSemana,
+  gerarSemana,
+  type CelulaGerada,
+  type ResultadoGeracao,
+} from './gerar'
+export {
   ancoraValida,
   feriadoNoIntervalo,
   formatDia,
@@ -49,6 +56,8 @@ export {
   type Permuta,
   type PermutaDraft,
   type PermutaErro,
+  type CelulaGrade,
+  type PapelCelula,
   type EstadoSemana,
   type Oficial,
   type OficialDraft,
