@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest'
 
 import {
   feriadoNoIntervalo,
+  formatarDiaBr,
+  formatarIntervaloBr,
   intervaloSegundaSextaValido,
+  parseDiaBr,
   recortarSemana,
   segundaDuplicada,
   validarCriacaoSemana,
@@ -22,6 +25,14 @@ const semana14: SemanaEscala = {
 }
 
 describe('núcleo da semana', () => {
+  it('mostra e lê datas no formato brasileiro', () => {
+    expect(formatarDiaBr('2026-09-14')).toBe('14/09/2026')
+    expect(formatarIntervaloBr('2026-09-14', '2026-09-18')).toBe('14/09/2026 a 18/09/2026')
+    expect(parseDiaBr('14/09/2026')).toBe('2026-09-14')
+    expect(parseDiaBr('2026-09-14')).toBe('2026-09-14')
+    expect(parseDiaBr('32/09/2026')).toBeNull()
+  })
+
   it('recorta uma quarta para segunda–sexta', () => {
     expect(recortarSemana('2026-09-16')).toEqual({
       dataInicio: '2026-09-14',

@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import { CampoData } from '@/components/campo-data'
 import { editorNavHover, EditorNavButton } from '@/components/editor-menu'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAusenciasService } from '@/hooks/ausencias-context'
 import { useOficiaisService } from '@/hooks/oficiais-context'
-import { type Ausencia, type Oficial, type TipoAusencia } from '@/lib/escala'
+import { formatarIntervaloBr, type Ausencia, type Oficial, type TipoAusencia } from '@/lib/escala'
 import { AusenciasValidacaoError } from '@/services/ausencias'
 
 const TIPOS: { valor: TipoAusencia; rotulo: string }[] = [
@@ -181,20 +182,20 @@ export function AusenciasPage() {
         ) : null}
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="ausencia-inicio">Início</Label>
-          <Input
+          <CampoData
+            key={`inicio-${editandoId ?? 'novo'}`}
             id="ausencia-inicio"
-            type="date"
             value={dataInicio}
-            onChange={(event) => setDataInicio(event.target.value)}
+            onChange={setDataInicio}
           />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="ausencia-fim">Fim</Label>
-          <Input
+          <CampoData
+            key={`fim-${editandoId ?? 'novo'}`}
             id="ausencia-fim"
-            type="date"
             value={dataFim}
-            onChange={(event) => setDataFim(event.target.value)}
+            onChange={setDataFim}
           />
         </div>
         <div className="flex flex-wrap gap-2">
@@ -239,8 +240,8 @@ export function AusenciasPage() {
                 <p className="font-medium">{nomeOficial(ausencia.oficialId)}</p>
                 <p className="text-xs text-muted-foreground">
                   {rotuloTipo(ausencia.tipo)}
-                  {ausencia.motivo ? ` — ${ausencia.motivo}` : ''} · {ausencia.dataInicio} a{' '}
-                  {ausencia.dataFim}
+                  {ausencia.motivo ? ` — ${ausencia.motivo}` : ''} ·{' '}
+                  {formatarIntervaloBr(ausencia.dataInicio, ausencia.dataFim)}
                 </p>
               </div>
               <div className="flex gap-2">

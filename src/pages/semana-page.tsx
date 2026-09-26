@@ -2,6 +2,7 @@ import { type FormEvent, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
 
+import { CampoData } from '@/components/campo-data'
 import { EditorNavButton } from '@/components/editor-menu'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -9,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSemanasService } from '@/hooks/semanas-context'
-import { type SemanaEscala } from '@/lib/escala'
+import { formatarDiaBr, formatarIntervaloBr, type SemanaEscala } from '@/lib/escala'
 import { SemanasValidacaoError } from '@/services/semanas'
 
 function mensagemErro(cause: unknown): string {
@@ -118,7 +119,8 @@ export function SemanaPage() {
     <section className="mx-auto flex w-full max-w-2xl flex-col gap-4">
       <h2 className="text-xl font-semibold">Parâmetros da semana</h2>
       <p className="text-sm text-muted-foreground">
-        T-05: {semana.dataInicio} a {semana.dataFim}. Feriados só para exibição.
+        T-05: {formatarIntervaloBr(semana.dataInicio, semana.dataFim)}. Feriados só para
+        exibição.
         Sem gerar a grade.
       </p>
 
@@ -126,12 +128,7 @@ export function SemanaPage() {
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="semana-feriado">Feriado local</Label>
           <div className="flex flex-wrap gap-2">
-            <Input
-              id="semana-feriado"
-              type="date"
-              value={novoFeriado}
-              onChange={(event) => setNovoFeriado(event.target.value)}
-            />
+            <CampoData id="semana-feriado" value={novoFeriado} onChange={setNovoFeriado} />
             <Button type="button" variant="outline" onClick={acrescentarFeriado}>
               Acrescentar
             </Button>
@@ -141,7 +138,7 @@ export function SemanaPage() {
           <ul className="flex flex-col gap-2">
             {feriados.map((feriado) => (
               <li key={feriado} className="flex items-center justify-between gap-2 text-sm">
-                <span>{feriado} (exibição)</span>
+                <span>{formatarDiaBr(feriado)} (exibição)</span>
                 <Button
                   type="button"
                   size="sm"

@@ -1,13 +1,13 @@
 import { type FormEvent, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import { CampoData } from '@/components/campo-data'
 import { EditorNavButton } from '@/components/editor-menu'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSemanasService } from '@/hooks/semanas-context'
-import { type SemanaEscala } from '@/lib/escala'
+import { formatarIntervaloBr, type SemanaEscala } from '@/lib/escala'
 import { SemanasValidacaoError } from '@/services/semanas'
 
 function mensagemErro(cause: unknown): string {
@@ -17,7 +17,7 @@ function mensagemErro(cause: unknown): string {
 }
 
 function rotuloIntervalo(semana: SemanaEscala): string {
-  return `${semana.dataInicio} a ${semana.dataFim}`
+  return formatarIntervaloBr(semana.dataInicio, semana.dataFim)
 }
 
 export function SemanasListaPage() {
@@ -101,12 +101,7 @@ export function SemanasListaPage() {
       <form className="flex flex-col gap-3 rounded-lg border p-3" onSubmit={onSubmit}>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="semana-data">Data de referência</Label>
-          <Input
-            id="semana-data"
-            type="date"
-            value={dataEscolhida}
-            onChange={(event) => setDataEscolhida(event.target.value)}
-          />
+          <CampoData id="semana-data" value={dataEscolhida} onChange={setDataEscolhida} />
         </div>
         <Button type="submit" pending={aGravar} disabled={ocupado || !dataEscolhida}>
           Criar semana

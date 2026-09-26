@@ -25,6 +25,28 @@ export function formatDia(data: Date): string {
   return format(data, DIA)
 }
 
+const DIA_BR = 'dd/MM/yyyy'
+
+export function formatarDiaBr(iso: string): string {
+  const data = parseDia(iso)
+  return data ? format(data, DIA_BR) : iso
+}
+
+export function formatarIntervaloBr(inicio: string, fim: string): string {
+  return `${formatarDiaBr(inicio)} a ${formatarDiaBr(fim)}`
+}
+
+export function parseDiaBr(texto: string): string | null {
+  const limpo = texto.trim()
+  if (parseDia(limpo)) return limpo
+  const partes = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(limpo)
+  if (!partes) return null
+  const dia = partes[1].padStart(2, '0')
+  const mes = partes[2].padStart(2, '0')
+  const iso = `${partes[3]}-${mes}-${dia}`
+  return parseDia(iso) ? iso : null
+}
+
 export function recortarSemana(iso: string): {
   dataInicio: string
   dataFim: string
