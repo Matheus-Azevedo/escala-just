@@ -46,6 +46,27 @@ export type SemanaErro =
   | 'feriado-fora'
   | 'ancora-invalida'
 
+export type TipoAusencia = 'ferias' | 'doenca' | 'outro'
+
+export type Ausencia = {
+  id: string
+  oficialId: string
+  tipo: TipoAusencia
+  dataInicio: string
+  dataFim: string
+  motivo?: string
+}
+
+export type AusenciaDraft = {
+  oficialId: string
+  tipo: TipoAusencia
+  dataInicio: string
+  dataFim: string
+  motivo?: string
+}
+
+export type AusenciaErro = 'oficial-vazio' | 'tipo-invalido' | 'intervalo-invalido'
+
 export const TETO_ROTACAO = 24
 
 export function isPapel(value: unknown): value is Papel {

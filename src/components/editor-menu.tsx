@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 const ITENS = [
   { to: '/editor/semanas', label: 'Semanas' },
   { to: '/editor/oficiais', label: 'Cadastro de oficiais' },
+  { to: '/editor/ausencias', label: 'Ausências' },
 ] as const
 
 export const editorNavHover =

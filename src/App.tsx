@@ -8,15 +8,18 @@ import { Button } from '@/components/ui/button'
 import { Toaster } from '@/components/ui/sonner'
 import { AuthProvider, useAuth } from '@/hooks/auth-context'
 import { OficiaisProvider } from '@/hooks/oficiais-context'
+import { AusenciasProvider } from '@/hooks/ausencias-context'
 import { SemanasProvider } from '@/hooks/semanas-context'
 import { EditorPage } from '@/pages/editor-page'
 import { LeitorPage } from '@/pages/leitor-page'
 import { LoginPage } from '@/pages/login-page'
 import { OficiaisPage } from '@/pages/oficiais-page'
+import { AusenciasPage } from '@/pages/ausencias-page'
 import { SemanaPage } from '@/pages/semana-page'
 import { SemanasListaPage } from '@/pages/semanas-lista-page'
 import type { AuthService } from '@/services/auth'
 import type { OficiaisService } from '@/services/oficiais'
+import type { AusenciasService } from '@/services/ausencias'
 import type { SemanasService } from '@/services/semanas'
 
 export function AppRoutes() {
@@ -52,6 +55,14 @@ export function AppRoutes() {
         element={
           <RequireAuth papel="editor">
             <SemanaPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/editor/ausencias"
+        element={
+          <RequireAuth papel="editor">
+            <AusenciasPage />
           </RequireAuth>
         }
       />
@@ -104,19 +115,23 @@ export function AppTree({
   authService,
   oficiaisService,
   semanasService,
+  ausenciasService,
 }: {
   authService?: AuthService
   oficiaisService?: OficiaisService
   semanasService?: SemanasService
+  ausenciasService?: AusenciasService
 }) {
   return (
     <AuthProvider service={authService}>
       <OficiaisProvider service={oficiaisService}>
         <SemanasProvider service={semanasService}>
-          <AuthenticatedShell>
-            <AppRoutes />
-          </AuthenticatedShell>
-          <Toaster />
+          <AusenciasProvider service={ausenciasService}>
+            <AuthenticatedShell>
+              <AppRoutes />
+            </AuthenticatedShell>
+            <Toaster />
+          </AusenciasProvider>
         </SemanasProvider>
       </OficiaisProvider>
     </AuthProvider>

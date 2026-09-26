@@ -9,6 +9,14 @@ export {
   validarEscritaOficial,
 } from './oficiais'
 export {
+  intervaloAusenciaValido,
+  isTipoAusencia,
+  mensagemAusencia,
+  motivoAusencia,
+  oficialAusenteNoDia,
+  validarEscritaAusencia,
+} from './ausencia'
+export {
   ancoraValida,
   feriadoNoIntervalo,
   formatDia,
@@ -23,6 +31,10 @@ export {
 export {
   TETO_ROTACAO,
   isPapel,
+  type Ausencia,
+  type AusenciaDraft,
+  type AusenciaErro,
+  type TipoAusencia,
   type EstadoSemana,
   type Oficial,
   type OficialDraft,

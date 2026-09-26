@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { AppTree } from '../App'
 import { createMemoryAuthService } from '@/services/auth'
 import { createMemoryOficiaisService } from '@/services/oficiais'
+import { createMemoryAusenciasService } from '@/services/ausencias'
 import { createMemorySemanasService } from '@/services/semanas'
 import type { SemanaEscala } from '@/lib/escala'
 
@@ -32,6 +33,7 @@ function renderRota(
         authService={authService}
         oficiaisService={createMemoryOficiaisService()}
         semanasService={createMemorySemanasService(semanas)}
+        ausenciasService={createMemoryAusenciasService()}
       />
     </MemoryRouter>,
   )
@@ -149,6 +151,28 @@ describe('guardas de rota', () => {
     expect(
       screen.queryByRole('heading', { name: /cadastro de oficiais/i }),
     ).not.toBeInTheDocument()
+  })
+
+  it('leitor em /editor/ausencias vai para /leitor', async () => {
+    renderRota('/editor/ausencias', {
+      configured: true,
+      session: { uid: 'u4c', email: 'leitor@exemplo.com' },
+      papel: 'leitor',
+    })
+    expect(
+      await screen.findByRole('heading', { name: /consulta da escala/i }),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: /^ausências$/i })).not.toBeInTheDocument()
+  })
+
+  it('editor autenticado vê T-06 em /editor/ausencias', async () => {
+    renderRota('/editor/ausencias', {
+      configured: true,
+      session: { uid: 'u5b', email: 'editor@exemplo.com' },
+      papel: 'editor',
+    })
+    expect(await screen.findByRole('heading', { name: /^ausências$/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^gerar$/i })).not.toBeInTheDocument()
   })
 
   it('editor autenticado vê T-04 em /editor/oficiais', async () => {
