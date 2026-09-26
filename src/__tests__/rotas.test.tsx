@@ -7,6 +7,7 @@ import { AppTree } from '../App'
 import { createMemoryAuthService } from '@/services/auth'
 import { createMemoryOficiaisService } from '@/services/oficiais'
 import { createMemoryAusenciasService } from '@/services/ausencias'
+import { createMemoryPermutasService } from '@/services/permutas'
 import { createMemorySemanasService } from '@/services/semanas'
 import type { SemanaEscala } from '@/lib/escala'
 
@@ -34,6 +35,7 @@ function renderRota(
         oficiaisService={createMemoryOficiaisService()}
         semanasService={createMemorySemanasService(semanas)}
         ausenciasService={createMemoryAusenciasService()}
+        permutasService={createMemoryPermutasService()}
       />
     </MemoryRouter>,
   )
@@ -163,6 +165,28 @@ describe('guardas de rota', () => {
       await screen.findByRole('heading', { name: /consulta da escala/i }),
     ).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: /^ausências$/i })).not.toBeInTheDocument()
+  })
+
+  it('leitor em /editor/permutas vai para /leitor', async () => {
+    renderRota('/editor/permutas', {
+      configured: true,
+      session: { uid: 'u4d', email: 'leitor@exemplo.com' },
+      papel: 'leitor',
+    })
+    expect(
+      await screen.findByRole('heading', { name: /consulta da escala/i }),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: /^permutas$/i })).not.toBeInTheDocument()
+  })
+
+  it('editor autenticado vê T-07 em /editor/permutas', async () => {
+    renderRota('/editor/permutas', {
+      configured: true,
+      session: { uid: 'u5c', email: 'editor@exemplo.com' },
+      papel: 'editor',
+    })
+    expect(await screen.findByRole('heading', { name: /^permutas$/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^gerar$/i })).not.toBeInTheDocument()
   })
 
   it('editor autenticado vê T-06 em /editor/ausencias', async () => {

@@ -67,6 +67,34 @@ export type AusenciaDraft = {
 
 export type AusenciaErro = 'oficial-vazio' | 'tipo-invalido' | 'intervalo-invalido'
 
+export type PapelPermuta = 'titular' | 'suplente' | 'ambos'
+
+export type Permuta = {
+  id: string
+  afetadoId: string
+  substitutoId: string
+  papel: PapelPermuta
+  dataInicio: string
+  dataFim: string
+  observacao?: string
+}
+
+export type PermutaDraft = {
+  afetadoId: string
+  substitutoId: string
+  papel: PapelPermuta
+  dataInicio: string
+  dataFim: string
+  observacao?: string
+}
+
+export type PermutaErro =
+  | 'afetado-vazio'
+  | 'substituto-vazio'
+  | 'mesmo-oficial'
+  | 'papel-invalido'
+  | 'intervalo-invalido'
+
 export const TETO_ROTACAO = 24
 
 export function isPapel(value: unknown): value is Papel {

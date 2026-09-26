@@ -9,17 +9,20 @@ import { Toaster } from '@/components/ui/sonner'
 import { AuthProvider, useAuth } from '@/hooks/auth-context'
 import { OficiaisProvider } from '@/hooks/oficiais-context'
 import { AusenciasProvider } from '@/hooks/ausencias-context'
+import { PermutasProvider } from '@/hooks/permutas-context'
 import { SemanasProvider } from '@/hooks/semanas-context'
 import { EditorPage } from '@/pages/editor-page'
 import { LeitorPage } from '@/pages/leitor-page'
 import { LoginPage } from '@/pages/login-page'
 import { OficiaisPage } from '@/pages/oficiais-page'
 import { AusenciasPage } from '@/pages/ausencias-page'
+import { PermutasPage } from '@/pages/permutas-page'
 import { SemanaPage } from '@/pages/semana-page'
 import { SemanasListaPage } from '@/pages/semanas-lista-page'
 import type { AuthService } from '@/services/auth'
 import type { OficiaisService } from '@/services/oficiais'
 import type { AusenciasService } from '@/services/ausencias'
+import type { PermutasService } from '@/services/permutas'
 import type { SemanasService } from '@/services/semanas'
 
 export function AppRoutes() {
@@ -63,6 +66,14 @@ export function AppRoutes() {
         element={
           <RequireAuth papel="editor">
             <AusenciasPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/editor/permutas"
+        element={
+          <RequireAuth papel="editor">
+            <PermutasPage />
           </RequireAuth>
         }
       />
@@ -116,21 +127,25 @@ export function AppTree({
   oficiaisService,
   semanasService,
   ausenciasService,
+  permutasService,
 }: {
   authService?: AuthService
   oficiaisService?: OficiaisService
   semanasService?: SemanasService
   ausenciasService?: AusenciasService
+  permutasService?: PermutasService
 }) {
   return (
     <AuthProvider service={authService}>
       <OficiaisProvider service={oficiaisService}>
         <SemanasProvider service={semanasService}>
           <AusenciasProvider service={ausenciasService}>
-            <AuthenticatedShell>
-              <AppRoutes />
-            </AuthenticatedShell>
-            <Toaster />
+            <PermutasProvider service={permutasService}>
+              <AuthenticatedShell>
+                <AppRoutes />
+              </AuthenticatedShell>
+              <Toaster />
+            </PermutasProvider>
           </AusenciasProvider>
         </SemanasProvider>
       </OficiaisProvider>

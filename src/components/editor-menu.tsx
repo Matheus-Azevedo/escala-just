@@ -7,6 +7,7 @@ const ITENS = [
   { to: '/editor/semanas', label: 'Semanas' },
   { to: '/editor/oficiais', label: 'Cadastro de oficiais' },
   { to: '/editor/ausencias', label: 'Ausências' },
+  { to: '/editor/permutas', label: 'Permutas' },
 ] as const
 
 export const editorNavHover =

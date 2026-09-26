@@ -17,6 +17,13 @@ export {
   validarEscritaAusencia,
 } from './ausencia'
 export {
+  isPapelPermuta,
+  mensagemPermuta,
+  observacaoPermuta,
+  substitutoAssumeNoDia,
+  validarEscritaPermuta,
+} from './permuta'
+export {
   ancoraValida,
   feriadoNoIntervalo,
   formatDia,
@@ -38,6 +45,10 @@ export {
   type AusenciaDraft,
   type AusenciaErro,
   type TipoAusencia,
+  type PapelPermuta,
+  type Permuta,
+  type PermutaDraft,
+  type PermutaErro,
   type EstadoSemana,
   type Oficial,
   type OficialDraft,
