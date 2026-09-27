@@ -11,7 +11,8 @@ import { createMemoryAusenciasService } from '@/services/ausencias'
 import { createMemoryCelulasService } from '@/services/celulas'
 import { createMemoryPermutasService } from '@/services/permutas'
 import { createMemorySemanasService } from '@/services/semanas'
-import type { CelulaGrade, Oficial, SemanaEscala } from '@/lib/escala'
+import { createMemoryVersoesService } from '@/services/versoes'
+import type { CelulaGrade, Oficial, SemanaEscala, VersaoEscala } from '@/lib/escala'
 
 const semanaMemoria: SemanaEscala = {
   id: 's1',
@@ -30,6 +31,7 @@ function renderRota(
   semanas: SemanaEscala[] = [],
   oficiais: Oficial[] = [],
   celulas: CelulaGrade[] = [],
+  versoes: VersaoEscala[] = [],
 ) {
   const authService = createMemoryAuthService(auth)
   return render(
@@ -41,6 +43,7 @@ function renderRota(
         ausenciasService={createMemoryAusenciasService()}
         permutasService={createMemoryPermutasService()}
         celulasService={createMemoryCelulasService(celulas)}
+        versoesService={createMemoryVersoesService(versoes)}
       />
     </MemoryRouter>,
   )
@@ -100,6 +103,7 @@ describe('guardas de rota', () => {
     expect(
       screen.getByRole('link', { name: /cadastro de oficiais/i }),
     ).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /^histórico$/i })).toBeInTheDocument()
     expect(screen.queryByLabelText(/data de referência/i)).not.toBeInTheDocument()
   })
 
@@ -361,6 +365,78 @@ describe('guardas de rota', () => {
       await screen.findByRole('heading', { name: /parâmetros da semana/i }),
     ).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /grade da semana/i })).toBeInTheDocument()
+  })
+
+  it('editor vê o histórico e abre snapshot só-leitura', async () => {
+    const oficiais: Oficial[] = [
+      {
+        id: 'o1',
+        nome: 'Ana Silva',
+        foraDaRotacao: false,
+        ordemTitular: 1,
+        ordemSuplente: 1,
+      },
+    ]
+    const versao: VersaoEscala = {
+      id: 'v1',
+      semanaId: 's1',
+      criadoEm: '2026-09-20T12:00:00.000Z',
+      origem: 'gerar',
+      celulas: [
+        {
+          id: 'c1',
+          semanaId: 's1',
+          data: '2026-09-14',
+          papel: 'titular',
+          posicao: 1,
+          oficialId: 'o1',
+        },
+      ],
+    }
+    renderRota(
+      '/editor/historico',
+      {
+        configured: true,
+        session: { uid: 'u13', email: 'editor@exemplo.com' },
+        papel: 'editor',
+      },
+      [semanaMemoria],
+      oficiais,
+      [],
+      [versao],
+    )
+    expect(await screen.findByRole('heading', { name: /^histórico$/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /^abrir$/i })).toBeInTheDocument()
+
+    cleanup()
+    renderRota(
+      '/editor/historico/v1',
+      {
+        configured: true,
+        session: { uid: 'u13', email: 'editor@exemplo.com' },
+        papel: 'editor',
+      },
+      [semanaMemoria],
+      oficiais,
+      [],
+      [versao],
+    )
+    expect(await screen.findByText('Ana Silva')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /grade da semana/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^gerar$/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
+  })
+
+  it('leitor em /editor/historico vai para /leitor', async () => {
+    renderRota('/editor/historico', {
+      configured: true,
+      session: { uid: 'u14', email: 'leitor@exemplo.com' },
+      papel: 'leitor',
+    })
+    expect(
+      await screen.findByRole('heading', { name: /consulta da escala/i }),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: /^histórico$/i })).not.toBeInTheDocument()
   })
 
   it('login usa Input do kit e copy sem T-0', () => {

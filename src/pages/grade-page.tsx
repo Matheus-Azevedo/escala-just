@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { campoControloClass } from '@/components/ui/input'
 import { useAusenciasService } from '@/hooks/ausencias-context'
 import { useCelulasService } from '@/hooks/celulas-context'
+import { useVersoesService } from '@/hooks/versoes-context'
 import { useOficiaisService } from '@/hooks/oficiais-context'
 import { usePermutasService } from '@/hooks/permutas-context'
 import {
@@ -50,14 +51,17 @@ const LINHAS: { rotulo: string; papel: 'titular' | 'suplente'; posicao: number }
 export function GradeSemana({
   semana,
   consulta = false,
+  celulasFixas,
 }: {
   semana: SemanaEscala
   consulta?: boolean
+  celulasFixas?: CelulaGrade[]
 }) {
   const oficiaisServico = useOficiaisService()
   const ausenciasServico = useAusenciasService()
   const permutasServico = usePermutasService()
   const celulasServico = useCelulasService()
+  const versoesServico = useVersoesService()
 
   const [oficiais, setOficiais] = useState<Oficial[]>([])
   const [ausencias, setAusencias] = useState<Ausencia[]>([])
@@ -71,7 +75,7 @@ export function GradeSemana({
     void Promise.all([
       oficiaisServico.listar(),
       ausenciasServico.listar(),
-      celulasServico.listarDaSemana(semana.id),
+      celulasFixas ? Promise.resolve(celulasFixas) : celulasServico.listarDaSemana(semana.id),
     ])
       .then(([listaOficiais, listaAusencias, listaCelulas]) => {
         if (cancelado) return
@@ -87,12 +91,13 @@ export function GradeSemana({
     return () => {
       cancelado = true
     }
-  }, [ausenciasServico, celulasServico, oficiaisServico, semana.id])
+  }, [ausenciasServico, celulasFixas, celulasServico, oficiaisServico, semana.id])
 
   const dias = useMemo(() => diasUteisDaSemana(semana), [semana])
 
   async function gerar() {
     setAGerar(true)
+    const origem = celulas.length > 0 ? 'recalcular' : 'gerar'
     try {
       const [listaOficiais, ausencias, permutas] = await Promise.all([
         oficiaisServico.listar(),
@@ -108,6 +113,19 @@ export function GradeSemana({
       setOficiais(listaOficiais)
       setAusencias(ausencias)
       setCelulas(resultado.celulas)
+      try {
+        await versoesServico.guardar({
+          semanaId: semana.id,
+          origem,
+          celulas: resultado.celulas,
+        })
+      } catch (causaVersao) {
+        toast.error(
+          causaVersao instanceof Error
+            ? causaVersao.message
+            : 'A grade foi gerada, mas não foi possível guardar a versão.',
+        )
+      }
       if (resultado.avisos.length > 0) {
         toast.message(resultado.avisos.join(' '))
       } else {

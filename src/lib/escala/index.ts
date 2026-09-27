@@ -42,6 +42,7 @@ export {
   podeExportarEscala,
   type ExportarErro,
 } from './exportar'
+export { formatarInstanteBr, rotuloOrigemVersao } from './historico'
 export {
   ancoraValida,
   feriadoNoIntervalo,
@@ -78,4 +79,6 @@ export {
   type SemanaDraft,
   type SemanaEscala,
   type SemanaErro,
+  type OrigemVersao,
+  type VersaoEscala,
 } from './types'

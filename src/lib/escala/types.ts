@@ -106,6 +106,16 @@ export type CelulaGrade = {
   oficialId: string
 }
 
+export type OrigemVersao = 'gerar' | 'recalcular'
+
+export type VersaoEscala = {
+  id: string
+  semanaId: string
+  criadoEm: string
+  origem: OrigemVersao
+  celulas: CelulaGrade[]
+}
+
 export const TETO_ROTACAO = 24
 
 export function isPapel(value: unknown): value is Papel {

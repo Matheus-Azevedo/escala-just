@@ -12,6 +12,7 @@ import { AusenciasProvider } from '@/hooks/ausencias-context'
 import { CelulasProvider } from '@/hooks/celulas-context'
 import { PermutasProvider } from '@/hooks/permutas-context'
 import { SemanasProvider } from '@/hooks/semanas-context'
+import { VersoesProvider } from '@/hooks/versoes-context'
 import { EditorPage } from '@/pages/editor-page'
 import { LeitorPage } from '@/pages/leitor-page'
 import { LeitorSemanaPage } from '@/pages/leitor-semana-page'
@@ -21,12 +22,15 @@ import { AusenciasPage } from '@/pages/ausencias-page'
 import { PermutasPage } from '@/pages/permutas-page'
 import { SemanaPage } from '@/pages/semana-page'
 import { SemanasListaPage } from '@/pages/semanas-lista-page'
+import { HistoricoPage } from '@/pages/historico-page'
+import { HistoricoVersaoPage } from '@/pages/historico-versao-page'
 import type { AuthService } from '@/services/auth'
 import type { OficiaisService } from '@/services/oficiais'
 import type { AusenciasService } from '@/services/ausencias'
 import type { CelulasService } from '@/services/celulas'
 import type { PermutasService } from '@/services/permutas'
 import type { SemanasService } from '@/services/semanas'
+import type { VersoesService } from '@/services/versoes'
 
 function RedirecionarGradeParaDetalhes() {
   const { id } = useParams<{ id: string }>()
@@ -94,6 +98,22 @@ export function AppRoutes() {
         }
       />
       <Route
+        path="/editor/historico"
+        element={
+          <RequireAuth papel="editor">
+            <HistoricoPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/editor/historico/:id"
+        element={
+          <RequireAuth papel="editor">
+            <HistoricoVersaoPage />
+          </RequireAuth>
+        }
+      />
+      <Route
         path="/leitor"
         element={
           <RequireAuth>
@@ -153,6 +173,7 @@ export function AppTree({
   ausenciasService,
   permutasService,
   celulasService,
+  versoesService,
 }: {
   authService?: AuthService
   oficiaisService?: OficiaisService
@@ -160,6 +181,7 @@ export function AppTree({
   ausenciasService?: AusenciasService
   permutasService?: PermutasService
   celulasService?: CelulasService
+  versoesService?: VersoesService
 }) {
   return (
     <AuthProvider service={authService}>
@@ -168,10 +190,12 @@ export function AppTree({
           <AusenciasProvider service={ausenciasService}>
             <PermutasProvider service={permutasService}>
               <CelulasProvider service={celulasService}>
-                <AuthenticatedShell>
-                  <AppRoutes />
-                </AuthenticatedShell>
-                <Toaster />
+                <VersoesProvider service={versoesService}>
+                  <AuthenticatedShell>
+                    <AppRoutes />
+                  </AuthenticatedShell>
+                  <Toaster />
+                </VersoesProvider>
               </CelulasProvider>
             </PermutasProvider>
           </AusenciasProvider>
