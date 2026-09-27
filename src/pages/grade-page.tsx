@@ -41,7 +41,13 @@ const LINHAS: { rotulo: string; papel: 'titular' | 'suplente'; posicao: number }
   { rotulo: 'Suplente 2', papel: 'suplente', posicao: 2 },
 ]
 
-export function GradeSemana({ semana }: { semana: SemanaEscala }) {
+export function GradeSemana({
+  semana,
+  consulta = false,
+}: {
+  semana: SemanaEscala
+  consulta?: boolean
+}) {
   const oficiaisServico = useOficiaisService()
   const ausenciasServico = useAusenciasService()
   const permutasServico = usePermutasService()
@@ -134,13 +140,24 @@ export function GradeSemana({ semana }: { semana: SemanaEscala }) {
       <p className="text-sm text-muted-foreground">
         Três titulares e dois suplentes por dia.
         {semana.exibirHorarioPlantao ? ' Plantão normal: 7h às 13h.' : ''}
-        {' '}
-        Recalcular substitui todos os ajustes manuais desta semana.
+        {!consulta ? ' Recalcular substitui todos os ajustes manuais desta semana.' : ''}
       </p>
 
-      <Button type="button" pending={aGerar} disabled={aGerar} onClick={() => void gerar()}>
-        {celulas.length > 0 ? 'Recalcular' : 'Gerar'}
-      </Button>
+      {consulta && celulas.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Ainda não há grade nesta semana.</p>
+      ) : null}
+
+      {!consulta ? (
+        <Button
+          type="button"
+          className="print:hidden"
+          pending={aGerar}
+          disabled={aGerar}
+          onClick={() => void gerar()}
+        >
+          {celulas.length > 0 ? 'Recalcular' : 'Gerar'}
+        </Button>
+      ) : null}
 
       <div className="overflow-x-auto rounded-lg border">
         <table className="w-full min-w-[40rem] text-left text-sm">
@@ -160,10 +177,10 @@ export function GradeSemana({ semana }: { semana: SemanaEscala }) {
                 <th className="px-2 py-2 font-medium">{linha.rotulo}</th>
                 {dias.map((dia) => {
                   const celula = celulaEm(celulas, dia, linha.papel, linha.posicao)
-                  if (!celula) {
+                  if (!celula || consulta) {
                     return (
                       <td key={dia} className="px-2 py-2">
-                        {nomeDoOficial(oficiais, '')}
+                        {nomeDoOficial(oficiais, celula?.oficialId ?? '')}
                       </td>
                     )
                   }

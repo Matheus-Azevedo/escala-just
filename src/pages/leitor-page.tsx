@@ -1,10 +1,85 @@
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
+
+import { EditorNavButton } from '@/components/editor-menu'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useSemanasService } from '@/hooks/semanas-context'
+import { formatarIntervaloBr, type SemanaEscala } from '@/lib/escala'
+
 export function LeitorPage() {
+  const servico = useSemanasService()
+  const [semanas, setSemanas] = useState<SemanaEscala[]>([])
+  const [listaPronta, setListaPronta] = useState(false)
+  const [mostrarEsqueleto, setMostrarEsqueleto] = useState(false)
+
+  useEffect(() => {
+    let cancelado = false
+    const atraso = window.setTimeout(() => {
+      if (!cancelado) setMostrarEsqueleto(true)
+    }, 150)
+    void servico
+      .listar()
+      .then((lista) => {
+        if (!cancelado) setSemanas(lista)
+      })
+      .catch((cause: unknown) => {
+        if (!cancelado) {
+          toast.error(cause instanceof Error ? cause.message : 'Não foi possível listar as semanas.')
+        }
+      })
+      .finally(() => {
+        window.clearTimeout(atraso)
+        if (!cancelado) {
+          setListaPronta(true)
+          setMostrarEsqueleto(false)
+        }
+      })
+    return () => {
+      cancelado = true
+      window.clearTimeout(atraso)
+    }
+  }, [servico])
+
+  const lista = [...semanas].sort((a, b) => b.dataInicio.localeCompare(a.dataInicio))
+
   return (
-    <section className="mx-auto flex w-full max-w-2xl flex-col gap-3">
+    <section className="mx-auto flex w-full max-w-2xl flex-col gap-4">
       <h2 className="text-xl font-semibold">Consulta da escala</h2>
-      <p className="text-sm text-muted-foreground">
-        Placeholder T-03: consulta sem controlos de edição.
+      <p className="text-sm text-muted-foreground print:hidden">
+        Titulares e suplentes por dia. Só leitura.
       </p>
+
+      {!listaPronta && mostrarEsqueleto ? (
+        <ul className="flex flex-col gap-2" aria-busy="true" aria-label="A carregar semanas">
+          {[0, 1].map((indice) => (
+            <li key={indice} className="rounded-md border px-3 py-2">
+              <Skeleton className="h-4 w-40" />
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {listaPronta && lista.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Nenhuma semana para consultar.</p>
+      ) : null}
+
+      {listaPronta && lista.length > 0 ? (
+        <ul className="flex flex-col gap-2">
+          {lista.map((semana) => (
+            <li
+              key={semana.id}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2"
+            >
+              <p className="font-medium">{formatarIntervaloBr(semana.dataInicio, semana.dataFim)}</p>
+              <span className="print:hidden">
+                <EditorNavButton size="sm" to={`/leitor/semanas/${semana.id}`}>
+                  Consultar
+                </EditorNavButton>
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </section>
   )
 }

@@ -10,7 +10,7 @@ import { createMemoryAusenciasService } from '@/services/ausencias'
 import { createMemoryCelulasService } from '@/services/celulas'
 import { createMemoryPermutasService } from '@/services/permutas'
 import { createMemorySemanasService } from '@/services/semanas'
-import type { Oficial, SemanaEscala } from '@/lib/escala'
+import type { CelulaGrade, Oficial, SemanaEscala } from '@/lib/escala'
 
 const semanaMemoria: SemanaEscala = {
   id: 's1',
@@ -28,6 +28,7 @@ function renderRota(
   auth: Parameters<typeof createMemoryAuthService>[0],
   semanas: SemanaEscala[] = [],
   oficiais: Oficial[] = [],
+  celulas: CelulaGrade[] = [],
 ) {
   const authService = createMemoryAuthService(auth)
   return render(
@@ -38,7 +39,7 @@ function renderRota(
         semanasService={createMemorySemanasService(semanas)}
         ausenciasService={createMemoryAusenciasService()}
         permutasService={createMemoryPermutasService()}
-        celulasService={createMemoryCelulasService()}
+        celulasService={createMemoryCelulasService(celulas)}
       />
     </MemoryRouter>,
   )
@@ -285,6 +286,62 @@ describe('guardas de rota', () => {
     )
     await user.click(await screen.findByRole('button', { name: /^gerar$/i }))
     expect(await screen.findAllByRole('combobox')).not.toHaveLength(0)
+  })
+
+  it('leitor em /leitor vê semanas sem Gerar', async () => {
+    renderRota(
+      '/leitor',
+      {
+        configured: true,
+        session: { uid: 'u10', email: 'leitor@exemplo.com' },
+        papel: 'leitor',
+      },
+      [semanaMemoria],
+    )
+    expect(
+      await screen.findByRole('heading', { name: /consulta da escala/i }),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/14\/09\/2026/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /^consultar$/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^gerar$/i })).not.toBeInTheDocument()
+  })
+
+  it('leitor em /leitor/semanas/:id vê nomes sem edição', async () => {
+    const oficiais: Oficial[] = [
+      {
+        id: 'o1',
+        nome: 'Ana Silva',
+        foraDaRotacao: false,
+        ordemTitular: 1,
+        ordemSuplente: 1,
+      },
+    ]
+    const celulas: CelulaGrade[] = [
+      {
+        id: 'c1',
+        semanaId: 's1',
+        data: '2026-09-14',
+        papel: 'titular',
+        posicao: 1,
+        oficialId: 'o1',
+      },
+    ]
+    renderRota(
+      '/leitor/semanas/s1',
+      {
+        configured: true,
+        session: { uid: 'u11', email: 'leitor@exemplo.com' },
+        papel: 'leitor',
+      },
+      [semanaMemoria],
+      oficiais,
+      celulas,
+    )
+    expect(await screen.findByText('Ana Silva')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /grade da semana/i })).toBeInTheDocument()
+    expect(screen.getByText(/titular 1/i)).toBeInTheDocument()
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^gerar$/i })).not.toBeInTheDocument()
   })
 
   it('editor em /editor/semanas/:id/grade vai para os detalhes da semana', async () => {
