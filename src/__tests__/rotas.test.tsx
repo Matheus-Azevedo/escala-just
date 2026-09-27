@@ -263,6 +263,7 @@ describe('guardas de rota', () => {
     ).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /grade da semana/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^gerar$/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /exportar csv/i })).toBeInTheDocument()
   })
 
   it('editor vê select na grade depois de gerar', async () => {
@@ -342,6 +343,7 @@ describe('guardas de rota', () => {
     expect(screen.getByText(/titular 1/i)).toBeInTheDocument()
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /^gerar$/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /exportar csv/i })).toBeInTheDocument()
   })
 
   it('editor em /editor/semanas/:id/grade vai para os detalhes da semana', async () => {

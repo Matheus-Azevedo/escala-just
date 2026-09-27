@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
+import { editorNavHover } from '@/components/editor-menu'
 import { Button } from '@/components/ui/button'
 import { useAusenciasService } from '@/hooks/ausencias-context'
 import { useCelulasService } from '@/hooks/celulas-context'
@@ -9,8 +10,12 @@ import { useOficiaisService } from '@/hooks/oficiais-context'
 import { usePermutasService } from '@/hooks/permutas-context'
 import {
   diasUteisDaSemana,
+  escalaParaCsv,
   formatarDiaBr,
+  formatarIntervaloBr,
+  mensagemExportar,
   oficiaisElegiveisParaCelula,
+  podeExportarEscala,
   type Ausencia,
   type CelulaGrade,
   type Oficial,
@@ -57,6 +62,7 @@ export function GradeSemana({
   const [ausencias, setAusencias] = useState<Ausencia[]>([])
   const [celulas, setCelulas] = useState<CelulaGrade[]>([])
   const [aGerar, setAGerar] = useState(false)
+  const [aExportar, setAExportar] = useState(false)
   const [ajustandoId, setAjustandoId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -134,6 +140,30 @@ export function GradeSemana({
     }
   }
 
+  function exportarCsv() {
+    const guarda = podeExportarEscala(celulas)
+    if (!guarda.ok) {
+      toast.error(mensagemExportar(guarda.erro))
+      return
+    }
+    setAExportar(true)
+    try {
+      const csv = escalaParaCsv(semana, celulas, oficiais)
+      const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+      const ligacao = document.createElement('a')
+      ligacao.href = url
+      ligacao.download = `escala-${formatarIntervaloBr(semana.dataInicio, semana.dataFim).replaceAll('/', '-')}.csv`
+      ligacao.click()
+      URL.revokeObjectURL(url)
+      toast.success('CSV descarregado.')
+    } catch (cause) {
+      toast.error(cause instanceof Error ? cause.message : 'Não foi possível exportar.')
+    } finally {
+      setAExportar(false)
+    }
+  }
+
   return (
     <div className="flex flex-col gap-3">
       <h3 className="text-lg font-semibold">Grade da semana</h3>
@@ -147,17 +177,23 @@ export function GradeSemana({
         <p className="text-sm text-muted-foreground">Ainda não há grade nesta semana.</p>
       ) : null}
 
-      {!consulta ? (
+      <div className="flex flex-wrap gap-2 print:hidden">
+        {!consulta ? (
+          <Button type="button" pending={aGerar} disabled={aGerar} onClick={() => void gerar()}>
+            {celulas.length > 0 ? 'Recalcular' : 'Gerar'}
+          </Button>
+        ) : null}
         <Button
           type="button"
-          className="print:hidden"
-          pending={aGerar}
-          disabled={aGerar}
-          onClick={() => void gerar()}
+          variant="outline"
+          className={editorNavHover}
+          pending={aExportar}
+          disabled={aExportar}
+          onClick={() => exportarCsv()}
         >
-          {celulas.length > 0 ? 'Recalcular' : 'Gerar'}
+          Exportar CSV
         </Button>
-      ) : null}
+      </div>
 
       <div className="overflow-x-auto rounded-lg border">
         <table className="w-full min-w-[40rem] text-left text-sm">

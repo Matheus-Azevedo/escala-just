@@ -37,6 +37,12 @@ export {
   type AjusteErro,
 } from './ajuste'
 export {
+  escalaParaCsv,
+  mensagemExportar,
+  podeExportarEscala,
+  type ExportarErro,
+} from './exportar'
+export {
   ancoraValida,
   feriadoNoIntervalo,
   formatDia,
