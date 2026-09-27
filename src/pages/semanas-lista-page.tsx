@@ -4,11 +4,36 @@ import { toast } from 'sonner'
 import { CampoData } from '@/components/campo-data'
 import { EditorNavButton } from '@/components/editor-menu'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useAusenciasService } from '@/hooks/ausencias-context'
+import { useCelulasService } from '@/hooks/celulas-context'
+import { useOficiaisService } from '@/hooks/oficiais-context'
+import { usePermutasService } from '@/hooks/permutas-context'
 import { useSemanasService } from '@/hooks/semanas-context'
-import { formatarIntervaloBr, type SemanaEscala } from '@/lib/escala'
+import {
+  ancorasContinuacao,
+  formatarIntervaloBr,
+  recortarSemana,
+  semanaOrigemContinuacao,
+  type SemanaEscala,
+} from '@/lib/escala'
+import type { CelulasService } from '@/services/celulas'
 import { SemanasValidacaoError } from '@/services/semanas'
+
+async function idsGeradas(
+  lista: SemanaEscala[],
+  celulasServico: CelulasService,
+): Promise<Set<string>> {
+  const ids = await Promise.all(
+    lista.map(async (semana) => {
+      const celulas = await celulasServico.listarDaSemana(semana.id)
+      return celulas.length > 0 ? semana.id : null
+    }),
+  )
+  return new Set(ids.filter((id): id is string => id !== null))
+}
 
 function mensagemErro(cause: unknown): string {
   if (cause instanceof SemanasValidacaoError) return cause.message
@@ -22,15 +47,23 @@ function rotuloIntervalo(semana: SemanaEscala): string {
 
 export function SemanasListaPage() {
   const servico = useSemanasService()
+  const oficiaisServico = useOficiaisService()
+  const ausenciasServico = useAusenciasService()
+  const permutasServico = usePermutasService()
+  const celulasServico = useCelulasService()
   const [semanas, setSemanas] = useState<SemanaEscala[]>([])
+  const [idsComCelulas, setIdsComCelulas] = useState<Set<string>>(new Set())
   const [dataEscolhida, setDataEscolhida] = useState('')
+  const [continuar, setContinuar] = useState(false)
   const [aGravar, setAGravar] = useState(false)
   const [aRemoverId, setARemoverId] = useState<string | null>(null)
   const [listaPronta, setListaPronta] = useState(false)
   const [mostrarEsqueleto, setMostrarEsqueleto] = useState(false)
 
   async function recarregar() {
-    setSemanas(await servico.listar())
+    const lista = await servico.listar()
+    setSemanas(lista)
+    setIdsComCelulas(await idsGeradas(lista, celulasServico))
   }
 
   useEffect(() => {
@@ -40,8 +73,10 @@ export function SemanasListaPage() {
     }, 150)
     void servico
       .listar()
-      .then((lista) => {
-        if (!cancelado) setSemanas(lista)
+      .then(async (lista) => {
+        if (cancelado) return
+        setSemanas(lista)
+        setIdsComCelulas(await idsGeradas(lista, celulasServico))
       })
       .catch((cause: unknown) => {
         if (!cancelado) toast.error(mensagemErro(cause))
@@ -57,13 +92,36 @@ export function SemanasListaPage() {
       cancelado = true
       window.clearTimeout(atraso)
     }
-  }, [servico])
+  }, [servico, celulasServico])
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setAGravar(true)
     try {
-      await servico.criar({ dataEscolhida })
+      const recorte = recortarSemana(dataEscolhida)
+      let ancoraTitular = 1
+      let ancoraSuplente = 1
+      if (continuar && recorte) {
+        const origem = semanaOrigemContinuacao(semanas, idsComCelulas, recorte.dataInicio)
+        if (!origem) {
+          toast.error('Não há semana gerada anterior.')
+          return
+        }
+        const [oficiais, ausencias, permutas] = await Promise.all([
+          oficiaisServico.listar(),
+          ausenciasServico.listar(),
+          permutasServico.listar(),
+        ])
+        const ancoras = ancorasContinuacao({
+          origem,
+          oficiais,
+          ausencias,
+          permutas,
+        })
+        ancoraTitular = ancoras.ancoraTitular
+        ancoraSuplente = ancoras.ancoraSuplente
+      }
+      await servico.criar({ dataEscolhida, ancoraTitular, ancoraSuplente })
       toast.success('Semana criada.')
       setDataEscolhida('')
       await recarregar()
@@ -101,6 +159,15 @@ export function SemanasListaPage() {
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="semana-data">Data de referência</Label>
           <CampoData id="semana-data" value={dataEscolhida} onChange={setDataEscolhida} />
+        </div>
+        <div className="flex items-center gap-2">
+          <Checkbox
+            id="semana-continuar"
+            checked={continuar}
+            disabled={idsComCelulas.size === 0}
+            onCheckedChange={(value) => setContinuar(value === true)}
+          />
+          <Label htmlFor="semana-continuar">Continuar da semana anterior</Label>
         </div>
         <Button type="submit" pending={aGravar} disabled={ocupado || !dataEscolhida}>
           Criar semana

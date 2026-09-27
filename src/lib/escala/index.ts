@@ -24,12 +24,14 @@ export {
   validarEscritaPermuta,
 } from './permuta'
 export {
+  ancoraAposCursor,
   conflitoTitularSuplenteNoDia,
   diasUteisDaSemana,
   gerarSemana,
   type CelulaGerada,
   type ResultadoGeracao,
 } from './gerar'
+export { ancorasContinuacao, semanaOrigemContinuacao } from './continuidade'
 export {
   mensagemAjuste,
   oficiaisElegiveisParaCelula,

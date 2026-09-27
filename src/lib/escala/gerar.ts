@@ -16,6 +16,13 @@ export type CelulaGerada = Omit<CelulaGrade, 'id'>
 export type ResultadoGeracao = {
   celulas: CelulaGerada[]
   avisos: string[]
+  proximaAncoraTitular: number
+  proximaAncoraSuplente: number
+}
+
+export function ancoraAposCursor(cursor: number, tamanhoFila: number): number {
+  if (tamanhoFila <= 0) return 1
+  return (cursor % tamanhoFila) + 1
 }
 
 export function diasUteisDaSemana(semana: SemanaEscala): string[] {
@@ -200,5 +207,10 @@ export function gerarSemana(entrada: {
     avisos,
   )
 
-  return { celulas: comPermutas, avisos }
+  return {
+    celulas: comPermutas,
+    avisos,
+    proximaAncoraTitular: ancoraAposCursor(cursorTitular.i, filaTitular.length),
+    proximaAncoraSuplente: ancoraAposCursor(cursorSuplente.i, filaSuplente.length),
+  }
 }

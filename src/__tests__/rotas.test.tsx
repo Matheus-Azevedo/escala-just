@@ -107,6 +107,67 @@ describe('guardas de rota', () => {
     expect(screen.queryByLabelText(/data de referência/i)).not.toBeInTheDocument()
   })
 
+  it('T-02 mostra checkbox de continuidade', async () => {
+    renderRota('/editor/semanas', {
+      configured: true,
+      session: { uid: 'u3c', email: 'editor@exemplo.com' },
+      papel: 'editor',
+    })
+    expect(
+      await screen.findByRole('heading', { name: /semanas/i }),
+    ).toBeInTheDocument()
+    const caixa = screen.getByLabelText(/continuar da semana anterior/i)
+    expect(caixa).toBeDisabled()
+  })
+
+  it('criar semana com continuidade herda âncoras', async () => {
+    const user = userEvent.setup()
+    const oficiais: Oficial[] = Array.from({ length: 8 }, (_, i) => ({
+      id: `o${i + 1}`,
+      nome: `o${i + 1}`,
+      foraDaRotacao: false,
+      ordemTitular: i + 1,
+      ordemSuplente: i + 1,
+    }))
+    const celulas: CelulaGrade[] = [
+      {
+        id: 'c1',
+        semanaId: 's1',
+        data: '2026-09-14',
+        papel: 'titular',
+        posicao: 1,
+        oficialId: 'o1',
+      },
+    ]
+    renderRota(
+      '/editor/semanas',
+      {
+        configured: true,
+        session: { uid: 'u3d', email: 'editor@exemplo.com' },
+        papel: 'editor',
+      },
+      [semanaMemoria],
+      oficiais,
+      celulas,
+    )
+    expect(
+      await screen.findByRole('heading', { name: /semanas/i }),
+    ).toBeInTheDocument()
+    const caixa = await screen.findByLabelText(/continuar da semana anterior/i)
+    expect(caixa).toBeEnabled()
+    await user.click(caixa)
+    await user.type(screen.getByLabelText(/data de referência/i), '21/09/2026')
+    await user.click(screen.getByRole('button', { name: /criar semana/i }))
+    expect(await screen.findByText(/semana criada/i)).toBeInTheDocument()
+    const detalhes = screen.getAllByRole('link', { name: /detalhes/i })
+    await user.click(detalhes[0])
+    expect(
+      await screen.findByRole('heading', { name: /parâmetros da semana/i }),
+    ).toBeInTheDocument()
+    expect(screen.getByLabelText(/âncora dos titulares/i)).toHaveValue(8)
+    expect(screen.getByLabelText(/âncora dos suplentes/i)).toHaveValue(2)
+  })
+
   it('editor autenticado vê T-02 em /editor/semanas', async () => {
     renderRota('/editor/semanas', {
       configured: true,
