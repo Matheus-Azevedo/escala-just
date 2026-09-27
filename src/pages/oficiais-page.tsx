@@ -118,7 +118,7 @@ export function OficiaisPage() {
     <section className="mx-auto flex w-full max-w-2xl flex-col gap-4">
       <h2 className="text-xl font-semibold">Cadastro de oficiais</h2>
       <p className="text-sm text-muted-foreground">
-        T-04: até 24 na rotação. Quem está fora da escala não conta nesse teto.
+        Até 24 na rotação. Quem está fora da escala não conta nesse teto.
       </p>
 
       <form className="flex flex-col gap-3 rounded-lg border p-3" onSubmit={onSubmit}>
@@ -144,7 +144,7 @@ export function OficiaisPage() {
             {editandoId ? 'Guardar' : 'Adicionar'}
           </Button>
           {editandoId ? (
-            <Button type="button" variant="outline" onClick={limparFormulario} disabled={ocupado}>
+            <Button type="button" variant="outline" className={editorNavHover} onClick={limparFormulario} disabled={ocupado}>
               Cancelar
             </Button>
           ) : null}

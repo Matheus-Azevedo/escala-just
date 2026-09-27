@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { useAuth } from '@/hooks/auth-context'
 
 function mensagemErro(error: unknown): string {
@@ -51,7 +53,7 @@ export function LoginPage() {
     <section className="mx-auto flex w-full max-w-sm flex-col gap-4">
       <h2 className="text-xl font-semibold">Entrar</h2>
       <p className="text-sm text-muted-foreground">
-        Autenticação da central e dos oficiais (T-01).
+        Autenticação da central e dos oficiais.
       </p>
       {state.status === 'no-profile' ? (
         <p className="text-sm text-muted-foreground" role="status">
@@ -59,11 +61,10 @@ export function LoginPage() {
         </p>
       ) : null}
       <form className="flex flex-col gap-3" onSubmit={onSubmit}>
-        <label className="flex flex-col gap-1 text-sm" htmlFor="login-email">
-          E-mail
-          <input
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="login-email">E-mail</Label>
+          <Input
             id="login-email"
-            className="rounded-md border bg-background px-3 py-2"
             type="email"
             name="email"
             autoComplete="username"
@@ -71,12 +72,11 @@ export function LoginPage() {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
           />
-        </label>
-        <label className="flex flex-col gap-1 text-sm" htmlFor="login-password">
-          Senha
-          <input
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="login-password">Senha</Label>
+          <Input
             id="login-password"
-            className="rounded-md border bg-background px-3 py-2"
             type="password"
             name="password"
             autoComplete="current-password"
@@ -84,7 +84,7 @@ export function LoginPage() {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />
-        </label>
+        </div>
         <Button
           type="submit"
           pending={submitting}

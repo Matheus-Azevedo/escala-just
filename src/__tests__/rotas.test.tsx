@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { AppTree } from '../App'
+import { buttonVariants } from '@/components/ui/button'
 import { createMemoryAuthService } from '@/services/auth'
 import { createMemoryOficiaisService } from '@/services/oficiais'
 import { createMemoryAusenciasService } from '@/services/ausencias'
@@ -360,6 +361,28 @@ describe('guardas de rota', () => {
       await screen.findByRole('heading', { name: /parâmetros da semana/i }),
     ).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /grade da semana/i })).toBeInTheDocument()
+  })
+
+  it('login usa Input do kit e copy sem T-0', () => {
+    renderRota('/login', { configured: true, session: null })
+    expect(document.getElementById('login-email')?.getAttribute('data-slot')).toBe(
+      'input',
+    )
+    expect(document.body.textContent ?? '').not.toMatch(/T-0/)
+    expect(buttonVariants({ variant: 'default' })).toContain('hover:bg-primary/80')
+    expect(buttonVariants({ variant: 'default' })).not.toContain('[a]:hover')
+  })
+
+  it('cadastro de oficiais sem códigos T-0', async () => {
+    renderRota('/editor/oficiais', {
+      configured: true,
+      session: { uid: 'u12', email: 'editor@exemplo.com' },
+      papel: 'editor',
+    })
+    expect(
+      await screen.findByRole('heading', { name: /cadastro de oficiais/i }),
+    ).toBeInTheDocument()
+    expect(document.body.textContent ?? '').not.toMatch(/T-0/)
   })
 
   it('sem env mostra que a configuração está em falta', () => {

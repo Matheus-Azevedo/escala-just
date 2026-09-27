@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 
 import { editorNavHover } from '@/components/editor-menu'
 import { Button } from '@/components/ui/button'
+import { campoControloClass } from '@/components/ui/input'
 import { useAusenciasService } from '@/hooks/ausencias-context'
 import { useCelulasService } from '@/hooks/celulas-context'
 import { useOficiaisService } from '@/hooks/oficiais-context'
@@ -198,7 +199,7 @@ export function GradeSemana({
       <div className="overflow-x-auto rounded-lg border">
         <table className="w-full min-w-[40rem] text-left text-sm">
           <thead>
-            <tr className="border-b bg-muted/40">
+            <tr className="border-b">
               <th className="px-2 py-2 font-medium">Vaga</th>
               {dias.map((dia) => (
                 <th key={dia} className="px-2 py-2 font-medium">
@@ -209,14 +210,37 @@ export function GradeSemana({
           </thead>
           <tbody>
             {LINHAS.map((linha) => (
-              <tr key={`${linha.papel}-${linha.posicao}`} className="border-b last:border-0">
-                <th className="px-2 py-2 font-medium">{linha.rotulo}</th>
+              <tr
+                key={`${linha.papel}-${linha.posicao}`}
+                className={
+                  linha.papel === 'suplente'
+                    ? 'border-b text-muted-foreground last:border-0'
+                    : 'border-b last:border-0'
+                }
+              >
+                <th
+                  className={
+                    linha.papel === 'titular'
+                      ? 'px-2 py-2 font-medium'
+                      : 'px-2 py-2 font-normal'
+                  }
+                >
+                  {linha.rotulo}
+                </th>
                 {dias.map((dia) => {
                   const celula = celulaEm(celulas, dia, linha.papel, linha.posicao)
                   if (!celula || consulta) {
+                    const nome = nomeDoOficial(oficiais, celula?.oficialId ?? '')
                     return (
-                      <td key={dia} className="px-2 py-2">
-                        {nomeDoOficial(oficiais, celula?.oficialId ?? '')}
+                      <td
+                        key={dia}
+                        className={
+                          nome === '—'
+                            ? 'px-2 py-2 text-muted-foreground'
+                            : 'px-2 py-2'
+                        }
+                      >
+                        {nome}
                       </td>
                     )
                   }
@@ -231,7 +255,7 @@ export function GradeSemana({
                     <td key={dia} className="px-2 py-2">
                       <div className="relative">
                         <select
-                          className={`w-full min-w-[7rem] rounded-md border bg-background px-1 py-1${aAjustar ? ' text-transparent' : ''}`}
+                          className={`${campoControloClass} min-w-[7rem] px-1${aAjustar ? ' text-transparent' : ''}`}
                           aria-label={`${linha.rotulo} em ${formatarDiaBr(dia)}`}
                           aria-busy={aAjustar || undefined}
                           value={celula.oficialId}

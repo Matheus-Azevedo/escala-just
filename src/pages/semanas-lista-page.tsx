@@ -94,8 +94,7 @@ export function SemanasListaPage() {
     <section className="mx-auto flex w-full max-w-2xl flex-col gap-4">
       <h2 className="text-xl font-semibold">Semanas</h2>
       <p className="text-sm text-muted-foreground">
-        T-02: escolha uma data; a escala fica na segunda a sexta dessa semana.
-        A geração da grade entra noutra change.
+        Escolha uma data; a escala fica na segunda a sexta dessa semana.
       </p>
 
       <form className="flex flex-col gap-3 rounded-lg border p-3" onSubmit={onSubmit}>

@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import { CampoData } from '@/components/campo-data'
 import { editorNavHover, EditorNavButton } from '@/components/editor-menu'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { campoControloClass, Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAusenciasService } from '@/hooks/ausencias-context'
@@ -128,8 +128,7 @@ export function AusenciasPage() {
     <section className="mx-auto flex w-full max-w-2xl flex-col gap-4">
       <h2 className="text-xl font-semibold">Ausências</h2>
       <p className="text-sm text-muted-foreground">
-        T-06: férias, doença ou outro. A geração da grade usa estes períodos
-        noutra change.
+        Férias, doença ou outro. Estes períodos entram na geração da grade.
       </p>
 
       <form className="flex flex-col gap-3 rounded-lg border p-3" onSubmit={onSubmit}>
@@ -137,7 +136,7 @@ export function AusenciasPage() {
           <Label htmlFor="ausencia-oficial">Oficial</Label>
           <select
             id="ausencia-oficial"
-            className="h-8 rounded-lg border border-border bg-background px-2.5 text-sm"
+            className={campoControloClass}
             value={oficialId}
             onChange={(event) => setOficialId(event.target.value)}
           >
@@ -153,7 +152,7 @@ export function AusenciasPage() {
           <Label htmlFor="ausencia-tipo">Tipo</Label>
           <select
             id="ausencia-tipo"
-            className="h-8 rounded-lg border border-border bg-background px-2.5 text-sm"
+            className={campoControloClass}
             value={tipo}
             onChange={(event) => {
               const seguinte = event.target.value as TipoAusencia

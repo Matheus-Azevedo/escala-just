@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
 
 import { CampoData } from '@/components/campo-data'
-import { EditorNavButton } from '@/components/editor-menu'
+import { editorNavHover, EditorNavButton } from '@/components/editor-menu'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
@@ -120,7 +120,7 @@ export function SemanaPage() {
     <section className="mx-auto flex w-full max-w-5xl flex-col gap-4">
       <h2 className="text-xl font-semibold">Parâmetros da semana</h2>
       <p className="text-sm text-muted-foreground">
-        T-05: {formatarIntervaloBr(semana.dataInicio, semana.dataFim)}. Feriados só para
+        {formatarIntervaloBr(semana.dataInicio, semana.dataFim)}. Feriados só para
         exibição.
       </p>
 
@@ -129,7 +129,7 @@ export function SemanaPage() {
           <Label htmlFor="semana-feriado">Feriado local</Label>
           <div className="flex flex-wrap gap-2">
             <CampoData id="semana-feriado" value={novoFeriado} onChange={setNovoFeriado} />
-            <Button type="button" variant="outline" onClick={acrescentarFeriado}>
+            <Button type="button" variant="outline" className={editorNavHover} onClick={acrescentarFeriado}>
               Acrescentar
             </Button>
           </div>

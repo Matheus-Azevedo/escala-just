@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import { CampoData } from '@/components/campo-data'
 import { editorNavHover, EditorNavButton } from '@/components/editor-menu'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { campoControloClass, Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useOficiaisService } from '@/hooks/oficiais-context'
@@ -135,7 +135,7 @@ export function PermutasPage() {
     <section className="mx-auto flex w-full max-w-2xl flex-col gap-4">
       <h2 className="text-xl font-semibold">Permutas</h2>
       <p className="text-sm text-muted-foreground">
-        T-07: quem cobre quem. A geração da grade usa estes acordos noutra change.
+        Quem cobre quem. Estes acordos entram na geração da grade.
       </p>
 
       <form className="flex flex-col gap-3 rounded-lg border p-3" onSubmit={onSubmit}>
@@ -143,7 +143,7 @@ export function PermutasPage() {
           <Label htmlFor="permuta-afetado">Oficial afetado</Label>
           <select
             id="permuta-afetado"
-            className="h-8 rounded-lg border border-border bg-background px-2.5 text-sm"
+            className={campoControloClass}
             value={afetadoId}
             onChange={(event) => {
               const seguinte = event.target.value
@@ -163,7 +163,7 @@ export function PermutasPage() {
           <Label htmlFor="permuta-substituto">Quem assume</Label>
           <select
             id="permuta-substituto"
-            className="h-8 rounded-lg border border-border bg-background px-2.5 text-sm"
+            className={campoControloClass}
             value={substitutoId}
             onChange={(event) => setSubstitutoId(event.target.value)}
           >
@@ -181,7 +181,7 @@ export function PermutasPage() {
           <Label htmlFor="permuta-papel">Papel</Label>
           <select
             id="permuta-papel"
-            className="h-8 rounded-lg border border-border bg-background px-2.5 text-sm"
+            className={campoControloClass}
             value={papel}
             onChange={(event) => setPapel(event.target.value as PapelPermuta)}
           >
