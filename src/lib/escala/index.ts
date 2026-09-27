@@ -33,6 +33,12 @@ export {
 } from './gerar'
 export { ancorasContinuacao, semanaOrigemContinuacao } from './continuidade'
 export {
+  agruparSemanasPorMes,
+  rotuloMesAno,
+  semanasDoPeriodo,
+  type RecortePeriodo,
+} from './periodo'
+export {
   mensagemAjuste,
   oficiaisElegiveisParaCelula,
   validarAjusteCelula,

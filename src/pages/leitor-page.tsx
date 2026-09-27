@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import { EditorNavButton } from '@/components/editor-menu'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSemanasService } from '@/hooks/semanas-context'
-import { formatarIntervaloBr, type SemanaEscala } from '@/lib/escala'
+import { agruparSemanasPorMes, formatarIntervaloBr, type SemanaEscala } from '@/lib/escala'
 
 export function LeitorPage() {
   const servico = useSemanasService()
@@ -40,7 +40,7 @@ export function LeitorPage() {
     }
   }, [servico])
 
-  const lista = [...semanas].sort((a, b) => b.dataInicio.localeCompare(a.dataInicio))
+  const grupos = agruparSemanasPorMes(semanas)
 
   return (
     <section className="mx-auto flex w-full max-w-2xl flex-col gap-4">
@@ -59,26 +59,35 @@ export function LeitorPage() {
         </ul>
       ) : null}
 
-      {listaPronta && lista.length === 0 ? (
+      {listaPronta && grupos.length === 0 ? (
         <p className="text-sm text-muted-foreground">Nenhuma semana para consultar.</p>
       ) : null}
 
-      {listaPronta && lista.length > 0 ? (
-        <ul className="flex flex-col gap-2">
-          {lista.map((semana) => (
-            <li
-              key={semana.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2"
-            >
-              <p className="font-medium">{formatarIntervaloBr(semana.dataInicio, semana.dataFim)}</p>
-              <span className="print:hidden">
-                <EditorNavButton size="sm" to={`/leitor/semanas/${semana.id}`}>
-                  Consultar
-                </EditorNavButton>
-              </span>
-            </li>
+      {listaPronta && grupos.length > 0 ? (
+        <div className="flex flex-col gap-4">
+          {grupos.map((grupo) => (
+            <section key={grupo.rotulo} className="flex flex-col gap-2">
+              <h3 className="text-sm font-semibold text-muted-foreground">{grupo.rotulo}</h3>
+              <ul className="flex flex-col gap-2">
+                {grupo.semanas.map((semana) => (
+                  <li
+                    key={semana.id}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2"
+                  >
+                    <p className="font-medium">
+                      {formatarIntervaloBr(semana.dataInicio, semana.dataFim)}
+                    </p>
+                    <span className="print:hidden">
+                      <EditorNavButton size="sm" to={`/leitor/semanas/${semana.id}`}>
+                        Consultar
+                      </EditorNavButton>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
           ))}
-        </ul>
+        </div>
       ) : null}
     </section>
   )

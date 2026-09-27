@@ -1,8 +1,10 @@
 import { type FormEvent, useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 
 import { CampoData } from '@/components/campo-data'
 import { EditorNavButton } from '@/components/editor-menu'
+import { FormularioPeriodo } from '@/components/formulario-periodo'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
@@ -13,6 +15,7 @@ import { useOficiaisService } from '@/hooks/oficiais-context'
 import { usePermutasService } from '@/hooks/permutas-context'
 import { useSemanasService } from '@/hooks/semanas-context'
 import {
+  agruparSemanasPorMes,
   ancorasContinuacao,
   formatarIntervaloBr,
   recortarSemana,
@@ -46,6 +49,8 @@ function rotuloIntervalo(semana: SemanaEscala): string {
 }
 
 export function SemanasListaPage() {
+  const [params, setParams] = useSearchParams()
+  const aba = params.get('aba') === 'periodo' ? 'periodo' : 'semana'
   const servico = useSemanasService()
   const oficiaisServico = useOficiaisService()
   const ausenciasServico = useAusenciasService()
@@ -145,16 +150,38 @@ export function SemanasListaPage() {
     }
   }
 
-  const lista = [...semanas].sort((a, b) => b.dataInicio.localeCompare(a.dataInicio))
+  const grupos = agruparSemanasPorMes(semanas)
   const ocupado = aGravar || aRemoverId !== null
 
   return (
     <section className="mx-auto flex w-full max-w-2xl flex-col gap-4">
       <h2 className="text-xl font-semibold">Semanas</h2>
       <p className="text-sm text-muted-foreground">
-        Escolha uma data; a escala fica na segunda a sexta dessa semana.
+        Crie uma semana ou um período; a lista abaixo junta tudo, por mês.
       </p>
 
+      <div className="flex gap-2 border-b" role="tablist" aria-label="Criar">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={aba === 'semana'}
+          className={`px-2 py-1.5 text-sm ${aba === 'semana' ? 'border-b-2 border-primary font-medium' : 'text-muted-foreground'}`}
+          onClick={() => setParams({}, { replace: true })}
+        >
+          Semana
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={aba === 'periodo'}
+          className={`px-2 py-1.5 text-sm ${aba === 'periodo' ? 'border-b-2 border-primary font-medium' : 'text-muted-foreground'}`}
+          onClick={() => setParams({ aba: 'periodo' }, { replace: true })}
+        >
+          Período
+        </button>
+      </div>
+
+      {aba === 'semana' ? (
       <form className="flex flex-col gap-3 rounded-lg border p-3" onSubmit={onSubmit}>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="semana-data">Data de referência</Label>
@@ -173,6 +200,13 @@ export function SemanasListaPage() {
           Criar semana
         </Button>
       </form>
+      ) : (
+        <FormularioPeriodo
+          temGerada={idsComCelulas.size > 0}
+          disabled={ocupado}
+          onConcluido={recarregar}
+        />
+      )}
 
       {!listaPronta && mostrarEsqueleto ? (
         <ul className="flex flex-col gap-2" aria-busy="true" aria-label="A carregar semanas">
@@ -185,41 +219,48 @@ export function SemanasListaPage() {
         </ul>
       ) : null}
 
-      {listaPronta && lista.length === 0 ? (
+      {listaPronta && grupos.length === 0 ? (
         <p className="text-sm text-muted-foreground">Nenhuma semana criada.</p>
       ) : null}
 
-      {listaPronta && lista.length > 0 ? (
-        <ul className="flex flex-col gap-2">
-          {lista.map((semana) => (
-            <li
-              key={semana.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2"
-            >
-              <div>
-                <p className="font-medium">{rotuloIntervalo(semana)}</p>
-                <p className="text-xs text-muted-foreground">{semana.estado}</p>
-              </div>
-              <div className="flex gap-2">
-                <EditorNavButton size="sm" to={`/editor/semanas/${semana.id}`}>
-                  Detalhes
-                </EditorNavButton>
-                {semana.estado === 'rascunho' ? (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="destructive"
-                    pending={aRemoverId === semana.id}
-                    disabled={ocupado}
-                    onClick={() => void onRemover(semana.id)}
+      {listaPronta && grupos.length > 0 ? (
+        <div className="flex flex-col gap-4">
+          {grupos.map((grupo) => (
+            <section key={grupo.rotulo} className="flex flex-col gap-2">
+              <h3 className="text-sm font-semibold text-muted-foreground">{grupo.rotulo}</h3>
+              <ul className="flex flex-col gap-2">
+                {grupo.semanas.map((semana) => (
+                  <li
+                    key={semana.id}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2"
                   >
-                    Remover
-                  </Button>
-                ) : null}
-              </div>
-            </li>
+                    <div>
+                      <p className="font-medium">{rotuloIntervalo(semana)}</p>
+                      <p className="text-xs text-muted-foreground">{semana.estado}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <EditorNavButton size="sm" to={`/editor/semanas/${semana.id}`}>
+                        Detalhes
+                      </EditorNavButton>
+                      {semana.estado === 'rascunho' ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="destructive"
+                          pending={aRemoverId === semana.id}
+                          disabled={ocupado}
+                          onClick={() => void onRemover(semana.id)}
+                        >
+                          Remover
+                        </Button>
+                      ) : null}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
           ))}
-        </ul>
+        </div>
       ) : null}
 
       <EditorNavButton to="/editor">Voltar</EditorNavButton>

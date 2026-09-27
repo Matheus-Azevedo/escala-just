@@ -104,7 +104,66 @@ describe('guardas de rota', () => {
       screen.getByRole('link', { name: /cadastro de oficiais/i }),
     ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /^histórico$/i })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /^período$/i })).not.toBeInTheDocument()
     expect(screen.queryByLabelText(/data de referência/i)).not.toBeInTheDocument()
+  })
+
+  it('editor vê o período na aba de Semanas', async () => {
+    const user = userEvent.setup()
+    renderRota('/editor/semanas', {
+      configured: true,
+      session: { uid: 'u3p', email: 'editor@exemplo.com' },
+      papel: 'editor',
+    })
+    expect(await screen.findByRole('heading', { name: /semanas/i })).toBeInTheDocument()
+    await user.click(screen.getByRole('tab', { name: /^período$/i }))
+    expect(screen.getByLabelText(/^recorte$/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /criar semanas/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /gerar período/i })).toBeInTheDocument()
+    expect(screen.getByText(/resultado é rascunho/i)).toBeInTheDocument()
+  })
+
+  it('editor em /editor/periodo vai para a aba Período', async () => {
+    renderRota('/editor/periodo', {
+      configured: true,
+      session: { uid: 'u3q', email: 'editor@exemplo.com' },
+      papel: 'editor',
+    })
+    expect(await screen.findByRole('heading', { name: /semanas/i })).toBeInTheDocument()
+    expect(await screen.findByLabelText(/^recorte$/i)).toBeInTheDocument()
+  })
+
+  it('leitor em /editor/periodo vai para /leitor', async () => {
+    renderRota('/editor/periodo', {
+      configured: true,
+      session: { uid: 'u4p', email: 'leitor@exemplo.com' },
+      papel: 'leitor',
+    })
+    expect(
+      await screen.findByRole('heading', { name: /consulta da escala/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('lista de semanas agrupa por mês', async () => {
+    renderRota(
+      '/editor/semanas',
+      {
+        configured: true,
+        session: { uid: 'u3m', email: 'editor@exemplo.com' },
+        papel: 'editor',
+      },
+      [
+        semanaMemoria,
+        {
+          ...semanaMemoria,
+          id: 's0',
+          dataInicio: '2026-08-31',
+          dataFim: '2026-09-04',
+        },
+      ],
+    )
+    expect(await screen.findByRole('heading', { name: /setembro 2026/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /agosto 2026/i })).toBeInTheDocument()
   })
 
   it('T-02 mostra checkbox de continuidade', async () => {
@@ -363,13 +422,23 @@ describe('guardas de rota', () => {
         session: { uid: 'u10', email: 'leitor@exemplo.com' },
         papel: 'leitor',
       },
-      [semanaMemoria],
+      [
+        semanaMemoria,
+        {
+          ...semanaMemoria,
+          id: 's0',
+          dataInicio: '2026-08-31',
+          dataFim: '2026-09-04',
+        },
+      ],
     )
     expect(
       await screen.findByRole('heading', { name: /consulta da escala/i }),
     ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /setembro 2026/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /agosto 2026/i })).toBeInTheDocument()
     expect(screen.getByText(/14\/09\/2026/)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /^consultar$/i })).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: /^consultar$/i }).length).toBeGreaterThanOrEqual(1)
     expect(screen.queryByRole('button', { name: /^gerar$/i })).not.toBeInTheDocument()
   })
 

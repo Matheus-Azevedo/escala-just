@@ -66,6 +66,14 @@ export function AppRoutes() {
         }
       />
       <Route
+        path="/editor/periodo"
+        element={
+          <RequireAuth papel="editor">
+            <Navigate to="/editor/semanas?aba=periodo" replace />
+          </RequireAuth>
+        }
+      />
+      <Route
         path="/editor/semanas/:id"
         element={
           <RequireAuth papel="editor">
