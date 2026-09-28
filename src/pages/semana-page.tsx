@@ -10,7 +10,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSemanasService } from '@/hooks/semanas-context'
-import { formatarDiaBr, formatarIntervaloBr, type SemanaEscala } from '@/lib/escala'
+import {
+  formatarDiaBr,
+  formatarIntervaloBr,
+  semanaVisivelNaLista,
+  type SemanaEscala,
+} from '@/lib/escala'
 import { GradeSemana } from '@/pages/grade-page'
 import { SemanasValidacaoError } from '@/services/semanas'
 
@@ -49,6 +54,11 @@ export function SemanaPage() {
         if (cancelado) return
         if (!encontrada) {
           toast.error('Semana não encontrada.')
+          navigate('/editor/semanas', { replace: true })
+          return
+        }
+        if (!semanaVisivelNaLista(encontrada)) {
+          toast.error('Esta semana já terminou.')
           navigate('/editor/semanas', { replace: true })
           return
         }

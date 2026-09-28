@@ -20,6 +20,7 @@ import {
   formatarIntervaloBr,
   recortarSemana,
   semanaOrigemContinuacao,
+  semanasVisiveisNaLista,
   type SemanaEscala,
 } from '@/lib/escala'
 import type { CelulasService } from '@/services/celulas'
@@ -150,7 +151,7 @@ export function SemanasListaPage() {
     }
   }
 
-  const grupos = agruparSemanasPorMes(semanas)
+  const grupos = agruparSemanasPorMes(semanasVisiveisNaLista(semanas))
   const ocupado = aGravar || aRemoverId !== null
 
   return (

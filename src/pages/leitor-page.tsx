@@ -4,7 +4,12 @@ import { toast } from 'sonner'
 import { EditorNavButton } from '@/components/editor-menu'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSemanasService } from '@/hooks/semanas-context'
-import { agruparSemanasPorMes, formatarIntervaloBr, type SemanaEscala } from '@/lib/escala'
+import {
+  agruparSemanasPorMes,
+  formatarIntervaloBr,
+  semanasVisiveisNaLista,
+  type SemanaEscala,
+} from '@/lib/escala'
 
 export function LeitorPage() {
   const servico = useSemanasService()
@@ -40,7 +45,7 @@ export function LeitorPage() {
     }
   }, [servico])
 
-  const grupos = agruparSemanasPorMes(semanas)
+  const grupos = agruparSemanasPorMes(semanasVisiveisNaLista(semanas))
 
   return (
     <section className="mx-auto flex w-full max-w-2xl flex-col gap-4">

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   agruparSemanasPorMes,
   rotuloMesAno,
+  semanaVisivelNaLista,
   semanasDoPeriodo,
   type SemanaEscala,
 } from '@/lib/escala'
@@ -51,5 +52,23 @@ describe('agruparSemanasPorMes', () => {
       rotuloMesAno('2026-08-31'),
     ])
     expect(grupos[0]?.semanas[0]?.id).toBe('s2')
+  })
+})
+
+describe('semanaVisivelNaLista', () => {
+  it('esconde sexta passada e mostra vigente e futura', () => {
+    const passada = semana('p', '2026-09-07', '2026-09-11')
+    const vigente = semana('v', '2026-09-14', '2026-09-18')
+    const futura = semana('f', '2026-09-21', '2026-09-25')
+    expect(semanaVisivelNaLista(passada, '2026-09-16')).toBe(false)
+    expect(semanaVisivelNaLista(vigente, '2026-09-16')).toBe(true)
+    expect(semanaVisivelNaLista(futura, '2026-09-16')).toBe(true)
+  })
+
+  it('no fim-de-semana só as futuras', () => {
+    const vigente = semana('v', '2026-09-14', '2026-09-18')
+    const futura = semana('f', '2026-09-21', '2026-09-25')
+    expect(semanaVisivelNaLista(vigente, '2026-09-19')).toBe(false)
+    expect(semanaVisivelNaLista(futura, '2026-09-19')).toBe(true)
   })
 })

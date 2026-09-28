@@ -1,7 +1,7 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { AppTree } from '../App'
 import { buttonVariants } from '@/components/ui/button'
@@ -50,8 +50,14 @@ function renderRota(
 }
 
 describe('guardas de rota', () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date(2026, 8, 2, 12, 0, 0))
+  })
+
   afterEach(() => {
     cleanup()
+    vi.useRealTimers()
   })
 
   it('anónimo em /editor vai para o login', () => {
@@ -442,6 +448,76 @@ describe('guardas de rota', () => {
     expect(screen.queryByRole('button', { name: /^gerar$/i })).not.toBeInTheDocument()
   })
 
+  it('listas escondem semana cuja sexta já passou', async () => {
+    vi.setSystemTime(new Date(2026, 8, 16, 12, 0, 0))
+    renderRota(
+      '/leitor',
+      {
+        configured: true,
+        session: { uid: 'u16l', email: 'leitor@exemplo.com' },
+        papel: 'leitor',
+      },
+      [
+        semanaMemoria,
+        {
+          ...semanaMemoria,
+          id: 's0',
+          dataInicio: '2026-08-31',
+          dataFim: '2026-09-04',
+        },
+      ],
+    )
+    expect(await screen.findByText(/14\/09\/2026/)).toBeInTheDocument()
+    expect(screen.queryByText(/31\/08\/2026/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: /agosto 2026/i })).not.toBeInTheDocument()
+  })
+
+  it('editor URL de semana passada volta à lista', async () => {
+    vi.setSystemTime(new Date(2026, 8, 16, 12, 0, 0))
+    renderRota(
+      '/editor/semanas/s0',
+      {
+        configured: true,
+        session: { uid: 'u16e', email: 'editor@exemplo.com' },
+        papel: 'editor',
+      },
+      [
+        {
+          ...semanaMemoria,
+          id: 's0',
+          dataInicio: '2026-08-31',
+          dataFim: '2026-09-04',
+        },
+      ],
+    )
+    expect(await screen.findByRole('heading', { name: /semanas/i })).toBeInTheDocument()
+    expect(await screen.findByText(/esta semana já terminou/i)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^gerar$/i })).not.toBeInTheDocument()
+  })
+
+  it('leitor URL de semana passada volta à consulta', async () => {
+    vi.setSystemTime(new Date(2026, 8, 16, 12, 0, 0))
+    renderRota(
+      '/leitor/semanas/s0',
+      {
+        configured: true,
+        session: { uid: 'u16r', email: 'leitor@exemplo.com' },
+        papel: 'leitor',
+      },
+      [
+        {
+          ...semanaMemoria,
+          id: 's0',
+          dataInicio: '2026-08-31',
+          dataFim: '2026-09-04',
+        },
+      ],
+    )
+    expect(await screen.findByText(/esta semana já terminou/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /consulta da escala/i })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: /grade da semana/i })).not.toBeInTheDocument()
+  })
+
   it('leitor em /leitor/semanas/:id vê nomes sem edição', async () => {
     const oficiais: Oficial[] = [
       {
@@ -536,6 +612,7 @@ describe('guardas de rota', () => {
       [versao],
     )
     expect(await screen.findByRole('heading', { name: /^histórico$/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /setembro 2026/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /^abrir$/i })).toBeInTheDocument()
 
     cleanup()

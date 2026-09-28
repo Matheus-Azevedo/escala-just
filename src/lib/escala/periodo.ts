@@ -4,6 +4,24 @@ import { ptBR } from 'date-fns/locale'
 import { formatDia, parseDia, recortarSemana } from './semana'
 import type { SemanaEscala } from './types'
 
+export function hojeIsoLista(agora: Date = new Date()): string {
+  return formatDia(agora)
+}
+
+export function semanaVisivelNaLista(
+  semana: Pick<SemanaEscala, 'dataFim'>,
+  hojeIso: string = hojeIsoLista(),
+): boolean {
+  return semana.dataFim >= hojeIso
+}
+
+export function semanasVisiveisNaLista(
+  semanas: SemanaEscala[],
+  hojeIso: string = hojeIsoLista(),
+): SemanaEscala[] {
+  return semanas.filter((semana) => semanaVisivelNaLista(semana, hojeIso))
+}
+
 export type RecortePeriodo =
   | { tipo: 'mes'; ano: number; mes: number }
   | { tipo: 'ano'; ano: number }

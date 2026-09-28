@@ -34,8 +34,11 @@ export {
 export { ancorasContinuacao, semanaOrigemContinuacao } from './continuidade'
 export {
   agruparSemanasPorMes,
+  hojeIsoLista,
   rotuloMesAno,
   semanasDoPeriodo,
+  semanasVisiveisNaLista,
+  semanaVisivelNaLista,
   type RecortePeriodo,
 } from './periodo'
 export {
@@ -50,7 +53,7 @@ export {
   podeExportarEscala,
   type ExportarErro,
 } from './exportar'
-export { formatarInstanteBr, rotuloOrigemVersao } from './historico'
+export { agruparVersoesPorMes, formatarInstanteBr, rotuloOrigemVersao } from './historico'
 export {
   ancoraValida,
   feriadoNoIntervalo,

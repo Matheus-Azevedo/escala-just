@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useSemanasService } from '@/hooks/semanas-context'
 import { useVersoesService } from '@/hooks/versoes-context'
 import {
+  agruparVersoesPorMes,
   formatarInstanteBr,
   formatarIntervaloBr,
   rotuloOrigemVersao,
@@ -55,6 +56,8 @@ export function HistoricoPage() {
     }
   }, [semanasServico, versoesServico])
 
+  const grupos = agruparVersoesPorMes(versoes, semanas)
+
   return (
     <section className="mx-auto flex w-full max-w-2xl flex-col gap-4">
       <h2 className="text-xl font-semibold">Histórico</h2>
@@ -77,25 +80,32 @@ export function HistoricoPage() {
         <p className="text-sm text-muted-foreground">Nenhuma versão guardada.</p>
       ) : null}
 
-      {listaPronta && versoes.length > 0 ? (
-        <ul className="flex flex-col gap-2">
-          {versoes.map((versao) => (
-            <li
-              key={versao.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2"
-            >
-              <div>
-                <p className="font-medium">{rotuloSemana(semanas, versao.semanaId)}</p>
-                <p className="text-xs text-muted-foreground">
-                  {formatarInstanteBr(versao.criadoEm)} · {rotuloOrigemVersao(versao.origem)}
-                </p>
-              </div>
-              <EditorNavButton to={`/editor/historico/${versao.id}`} size="sm">
-                Abrir
-              </EditorNavButton>
-            </li>
+      {listaPronta && grupos.length > 0 ? (
+        <div className="flex flex-col gap-4">
+          {grupos.map((grupo) => (
+            <section key={grupo.rotulo} className="flex flex-col gap-2">
+              <h3 className="text-sm font-semibold text-muted-foreground">{grupo.rotulo}</h3>
+              <ul className="flex flex-col gap-2">
+                {grupo.versoes.map((versao) => (
+                  <li
+                    key={versao.id}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2"
+                  >
+                    <div>
+                      <p className="font-medium">{rotuloSemana(semanas, versao.semanaId)}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatarInstanteBr(versao.criadoEm)} · {rotuloOrigemVersao(versao.origem)}
+                      </p>
+                    </div>
+                    <EditorNavButton to={`/editor/historico/${versao.id}`} size="sm">
+                      Abrir
+                    </EditorNavButton>
+                  </li>
+                ))}
+              </ul>
+            </section>
           ))}
-        </ul>
+        </div>
       ) : null}
     </section>
   )

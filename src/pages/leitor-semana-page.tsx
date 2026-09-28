@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { EditorNavButton } from '@/components/editor-menu'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSemanasService } from '@/hooks/semanas-context'
-import { formatarIntervaloBr, type SemanaEscala } from '@/lib/escala'
+import { formatarIntervaloBr, semanaVisivelNaLista, type SemanaEscala } from '@/lib/escala'
 import { GradeSemana } from '@/pages/grade-page'
 
 export function LeitorSemanaPage() {
@@ -31,6 +31,11 @@ export function LeitorSemanaPage() {
         if (cancelado) return
         if (!encontrada) {
           toast.error('Semana não encontrada.')
+          navigate('/leitor', { replace: true })
+          return
+        }
+        if (!semanaVisivelNaLista(encontrada)) {
+          toast.error('Esta semana já terminou.')
           navigate('/leitor', { replace: true })
           return
         }
