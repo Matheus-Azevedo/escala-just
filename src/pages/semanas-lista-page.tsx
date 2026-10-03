@@ -21,6 +21,7 @@ import {
   formatarIntervaloBr,
   modoRotacaoPadraoCriacao,
   recortarSemana,
+  rotuloModoRotacao,
   semanaOrigemContinuacao,
   semanasVisiveisNaLista,
   type ModoRotacao,
@@ -254,7 +255,9 @@ export function SemanasListaPage() {
                   >
                     <div>
                       <p className="font-medium">{rotuloIntervalo(semana)}</p>
-                      <p className="text-xs text-muted-foreground">{semana.estado}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {rotuloModoRotacao(semana.modoRotacao)}
+                      </p>
                     </div>
                     <div className="flex gap-2">
                       <EditorNavButton size="sm" to={`/editor/semanas/${semana.id}`}>

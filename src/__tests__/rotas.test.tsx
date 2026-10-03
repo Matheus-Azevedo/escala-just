@@ -171,6 +171,7 @@ describe('guardas de rota', () => {
     )
     expect(await screen.findByRole('heading', { name: /setembro 2026/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /agosto 2026/i })).toBeInTheDocument()
+    expect(screen.getAllByText(/alfabética \(nome\)/i).length).toBeGreaterThanOrEqual(2)
   })
 
   it('T-02 mostra checkbox de continuidade', async () => {
