@@ -1,6 +1,22 @@
 import { addDays, format, startOfWeek } from 'date-fns'
 
-import type { SemanaDraft, SemanaEscala, SemanaErro } from './types'
+import type { ModoRotacao, SemanaDraft, SemanaEscala, SemanaErro } from './types'
+
+export function lerModoRotacao(valor: unknown): ModoRotacao {
+  return valor === 'alfabetica' ? 'alfabetica' : 'cadastro'
+}
+
+export function modoRotacaoPadraoCriacao(): ModoRotacao {
+  return 'alfabetica'
+}
+
+export function inicioGeracaoFromModo(modo: ModoRotacao): 'alfabetico' | 'ancoras' {
+  return modo === 'alfabetica' ? 'alfabetico' : 'ancoras'
+}
+
+export function rotuloModoRotacao(modo: ModoRotacao): string {
+  return modo === 'alfabetica' ? 'Alfabética (nome)' : 'Cadastro (filas)'
+}
 
 const DIA = 'yyyy-MM-dd'
 
@@ -131,6 +147,7 @@ export function validarEscritaSemana(
       dataFim: string
       feriados: string[]
       exibirHorarioPlantao: boolean
+      modoRotacao: ModoRotacao
       ancoraTitular: number
       ancoraSuplente: number
     }
@@ -156,6 +173,8 @@ export function validarEscritaSemana(
   if (feriados.some((feriado) => !feriadoNoIntervalo(feriado, dataInicio, dataFim))) {
     return { ok: false, erro: 'feriado-fora' }
   }
+  const modoRotacao =
+    draft.modoRotacao ?? (atual ? atual.modoRotacao : modoRotacaoPadraoCriacao())
   const ancoraTitular = draft.ancoraTitular ?? atual?.ancoraTitular ?? 1
   const ancoraSuplente = draft.ancoraSuplente ?? atual?.ancoraSuplente ?? 1
   if (!ancoraValida(ancoraTitular) || !ancoraValida(ancoraSuplente)) {
@@ -167,6 +186,7 @@ export function validarEscritaSemana(
     dataFim,
     feriados: [...feriados].sort(),
     exibirHorarioPlantao: draft.exibirHorarioPlantao ?? atual?.exibirHorarioPlantao ?? true,
+    modoRotacao,
     ancoraTitular,
     ancoraSuplente,
   }

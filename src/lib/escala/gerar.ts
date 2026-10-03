@@ -31,18 +31,27 @@ export function diasUteisDaSemana(semana: SemanaEscala): string[] {
   return [0, 1, 2, 3, 4].map((offset) => formatDia(addDays(inicio, offset)))
 }
 
+function emRotacao(oficiais: Oficial[]): Oficial[] {
+  return oficiais.filter((oficial) => !oficial.foraDaRotacao)
+}
+
 function filaRotacao(
   oficiais: Oficial[],
   chave: 'ordemTitular' | 'ordemSuplente',
 ): Oficial[] {
-  return oficiais
-    .filter((oficial) => !oficial.foraDaRotacao)
+  return emRotacao(oficiais)
     .slice()
     .sort((a, b) => {
       const delta = a[chave] - b[chave]
       if (delta !== 0) return delta
       return a.nome.localeCompare(b.nome, 'pt-BR')
     })
+}
+
+function filaAlfabetica(oficiais: Oficial[]): Oficial[] {
+  return emRotacao(oficiais)
+    .slice()
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
 }
 
 function proximoElegivel(
@@ -138,16 +147,22 @@ export function gerarSemana(entrada: {
   oficiais: Oficial[]
   ausencias: Ausencia[]
   permutas: Permuta[]
+  inicio?: 'alfabetico' | 'ancoras'
 }): ResultadoGeracao {
   const avisos: string[] = []
   const dias = diasUteisDaSemana(entrada.semana)
-  const filaTitular = filaRotacao(entrada.oficiais, 'ordemTitular')
-  const filaSuplente = filaRotacao(entrada.oficiais, 'ordemSuplente')
+  const alfabetico = entrada.inicio === 'alfabetico'
+  const filaTitular = alfabetico
+    ? filaAlfabetica(entrada.oficiais)
+    : filaRotacao(entrada.oficiais, 'ordemTitular')
+  const filaSuplente = alfabetico
+    ? filaAlfabetica(entrada.oficiais)
+    : filaRotacao(entrada.oficiais, 'ordemSuplente')
   const cursorTitular = {
-    i: Math.max(0, entrada.semana.ancoraTitular - 1),
+    i: alfabetico ? 0 : Math.max(0, entrada.semana.ancoraTitular - 1),
   }
   const cursorSuplente = {
-    i: Math.max(0, entrada.semana.ancoraSuplente - 1),
+    i: alfabetico ? 0 : Math.max(0, entrada.semana.ancoraSuplente - 1),
   }
 
   const celulas: CelulaGerada[] = []

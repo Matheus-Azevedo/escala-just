@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 
 import { CampoData } from '@/components/campo-data'
 import { EditorNavButton } from '@/components/editor-menu'
+import { EscolhaModoRotacao } from '@/components/escolha-modo-rotacao'
 import { FormularioPeriodo } from '@/components/formulario-periodo'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -18,9 +19,11 @@ import {
   agruparSemanasPorMes,
   ancorasContinuacao,
   formatarIntervaloBr,
+  modoRotacaoPadraoCriacao,
   recortarSemana,
   semanaOrigemContinuacao,
   semanasVisiveisNaLista,
+  type ModoRotacao,
   type SemanaEscala,
 } from '@/lib/escala'
 import type { CelulasService } from '@/services/celulas'
@@ -61,6 +64,7 @@ export function SemanasListaPage() {
   const [idsComCelulas, setIdsComCelulas] = useState<Set<string>>(new Set())
   const [dataEscolhida, setDataEscolhida] = useState('')
   const [continuar, setContinuar] = useState(false)
+  const [modoRotacao, setModoRotacao] = useState<ModoRotacao>(modoRotacaoPadraoCriacao())
   const [aGravar, setAGravar] = useState(false)
   const [aRemoverId, setARemoverId] = useState<string | null>(null)
   const [listaPronta, setListaPronta] = useState(false)
@@ -107,6 +111,7 @@ export function SemanasListaPage() {
       const recorte = recortarSemana(dataEscolhida)
       let ancoraTitular = 1
       let ancoraSuplente = 1
+      let modo = modoRotacao
       if (continuar && recorte) {
         const origem = semanaOrigemContinuacao(semanas, idsComCelulas, recorte.dataInicio)
         if (!origem) {
@@ -126,8 +131,9 @@ export function SemanasListaPage() {
         })
         ancoraTitular = ancoras.ancoraTitular
         ancoraSuplente = ancoras.ancoraSuplente
+        modo = origem.modoRotacao
       }
-      await servico.criar({ dataEscolhida, ancoraTitular, ancoraSuplente })
+      await servico.criar({ dataEscolhida, ancoraTitular, ancoraSuplente, modoRotacao: modo })
       toast.success('Semana criada.')
       setDataEscolhida('')
       await recarregar()
@@ -197,6 +203,17 @@ export function SemanasListaPage() {
           />
           <Label htmlFor="semana-continuar">Continuar da semana anterior</Label>
         </div>
+        {continuar ? (
+          <p className="text-sm text-muted-foreground">
+            A ordem da rotação será a mesma da semana anterior.
+          </p>
+        ) : (
+          <EscolhaModoRotacao
+            idPrefix="semana-criar"
+            value={modoRotacao}
+            onChange={setModoRotacao}
+          />
+        )}
         <Button type="submit" pending={aGravar} disabled={ocupado || !dataEscolhida}>
           Criar semana
         </Button>

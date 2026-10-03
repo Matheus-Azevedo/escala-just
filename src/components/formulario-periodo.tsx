@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from 'react'
 import { toast } from 'sonner'
 
+import { EscolhaModoRotacao } from '@/components/escolha-modo-rotacao'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { campoControloClass } from '@/components/ui/input'
@@ -14,7 +15,9 @@ import { useVersoesService } from '@/hooks/versoes-context'
 import {
   ancorasContinuacao,
   semanaOrigemContinuacao,
+  modoRotacaoPadraoCriacao,
   semanasDoPeriodo,
+  type ModoRotacao,
   type RecortePeriodo,
   type SemanaEscala,
 } from '@/lib/escala'
@@ -49,6 +52,7 @@ export function FormularioPeriodo({
   const [ano, setAno] = useState(2026)
   const [mes, setMes] = useState(9)
   const [continuar, setContinuar] = useState(false)
+  const [modoRotacao, setModoRotacao] = useState<ModoRotacao>(modoRotacaoPadraoCriacao())
   const [aCriar, setACriar] = useState(false)
   const [aGerar, setAGerar] = useState(false)
 
@@ -69,7 +73,11 @@ export function FormularioPeriodo({
     const existentes = new Set(lista.map((semana) => semana.dataInicio))
     for (const semana of alvo) {
       if (existentes.has(semana.dataInicio)) continue
-      await semanasServico.criar({ dataInicio: semana.dataInicio, dataFim: semana.dataFim })
+      await semanasServico.criar({
+        dataInicio: semana.dataInicio,
+        dataFim: semana.dataFim,
+        modoRotacao,
+      })
     }
     lista = await semanasServico.listar()
     return alvo
@@ -117,7 +125,10 @@ export function FormularioPeriodo({
               ausencias,
               permutas,
             })
-            actual = await semanasServico.atualizar(semana.id, ancoras)
+            actual = await semanasServico.atualizar(semana.id, {
+              ...ancoras,
+              modoRotacao: origem.modoRotacao,
+            })
             lista.splice(
               lista.findIndex((item) => item.id === actual.id),
               1,
@@ -237,6 +248,17 @@ export function FormularioPeriodo({
         />
         <Label htmlFor="periodo-continuar">Continuar da semana anterior</Label>
       </div>
+      {continuar ? (
+        <p className="text-sm text-muted-foreground">
+          A ordem da rotação será a mesma da semana anterior.
+        </p>
+      ) : (
+        <EscolhaModoRotacao
+          idPrefix="periodo"
+          value={modoRotacao}
+          onChange={setModoRotacao}
+        />
+      )}
       <div className="flex flex-wrap gap-2">
         <Button type="submit" pending={aCriar} disabled={ocupado}>
           Criar semanas

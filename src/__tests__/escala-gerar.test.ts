@@ -16,6 +16,7 @@ const semana: SemanaEscala = {
   estado: 'rascunho',
   feriados: ['2026-09-16'],
   exibirHorarioPlantao: true,
+  modoRotacao: 'cadastro',
   ancoraTitular: 1,
   ancoraSuplente: 1,
 }
@@ -142,4 +143,70 @@ describe('gerarSemana', () => {
     expect(celula(resultado, '2026-09-14', 'suplente', 1)?.oficialId).toBe('o4')
     expect(resultado.avisos.some((aviso) => /não aplicada/i.test(aviso))).toBe(true)
   })
+
+  it('primeira geração alfabética começa no A', () => {
+    const lista = oficiaisForaDeOrdem()
+    const resultado = gerarSemana({
+      semana,
+      oficiais: lista,
+      ausencias: [],
+      permutas: [],
+      inicio: 'alfabetico',
+    })
+    expect(celula(resultado, '2026-09-14', 'titular', 1)?.oficialId).toBe('a')
+    expect(celula(resultado, '2026-09-14', 'titular', 2)?.oficialId).toBe('b')
+  })
+
+  it('modo âncoras não recomeça no A', () => {
+    const resultado = gerarSemana({
+      semana: { ...semana, ancoraTitular: 3, ancoraSuplente: 3 },
+      oficiais: oficiaisForaDeOrdem(),
+      ausencias: [],
+      permutas: [],
+      inicio: 'ancoras',
+    })
+    expect(celula(resultado, '2026-09-14', 'titular', 1)?.oficialId).toBe('b')
+  })
+
+  it('permuta não reordena o resto da fila alfabética', () => {
+    const permutas: Permuta[] = [
+      {
+        id: 'p1',
+        afetadoId: 'a',
+        substitutoId: 'g',
+        papel: 'titular',
+        dataInicio: '2026-09-14',
+        dataFim: '2026-09-14',
+      },
+    ]
+    const resultado = gerarSemana({
+      semana,
+      oficiais: oficiaisForaDeOrdem(),
+      ausencias: [],
+      permutas,
+      inicio: 'alfabetico',
+    })
+    expect(celula(resultado, '2026-09-14', 'titular', 1)?.oficialId).toBe('g')
+    expect(celula(resultado, '2026-09-14', 'titular', 2)?.oficialId).toBe('b')
+  })
 })
+
+function oficiaisForaDeOrdem(): Oficial[] {
+  const linhas: Array<[string, string, number]> = [
+    ['z', 'Zeca', 1],
+    ['a', 'Ana', 2],
+    ['b', 'Bruno', 3],
+    ['c', 'Caio', 4],
+    ['d', 'Davi', 5],
+    ['e', 'Eva', 6],
+    ['f', 'Fabio', 7],
+    ['g', 'Guto', 8],
+  ]
+  return linhas.map(([id, nome, ordem]) => ({
+    id,
+    nome,
+    foraDaRotacao: false,
+    ordemTitular: ordem,
+    ordemSuplente: ordem,
+  }))
+}

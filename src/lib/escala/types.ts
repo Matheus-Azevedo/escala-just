@@ -19,6 +19,8 @@ export type OficialErro = 'nome-vazio' | 'nome-duplicado' | 'teto-rotacao'
 
 export type EstadoSemana = 'rascunho' | 'validada' | 'arquivada'
 
+export type ModoRotacao = 'alfabetica' | 'cadastro'
+
 export type SemanaEscala = {
   id: string
   dataInicio: string
@@ -26,6 +28,7 @@ export type SemanaEscala = {
   estado: EstadoSemana
   feriados: string[]
   exibirHorarioPlantao: boolean
+  modoRotacao: ModoRotacao
   ancoraTitular: number
   ancoraSuplente: number
 }
@@ -36,6 +39,7 @@ export type SemanaDraft = {
   dataFim?: string
   feriados?: string[]
   exibirHorarioPlantao?: boolean
+  modoRotacao?: ModoRotacao
   ancoraTitular?: number
   ancoraSuplente?: number
 }

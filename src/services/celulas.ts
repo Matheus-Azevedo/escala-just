@@ -12,6 +12,7 @@ import {
 
 import {
   gerarSemana,
+  inicioGeracaoFromModo,
   mensagemAjuste,
   validarAjusteCelula,
   type Ausencia,
@@ -36,6 +37,7 @@ export class CelulasValidacaoError extends Error {
 
 export type CelulasService = {
   listarDaSemana: (semanaId: string) => Promise<CelulaGrade[]>
+  limpar: (semanaId: string) => Promise<void>
   gerar: (entrada: {
     semana: SemanaEscala
     oficiais: Oficial[]
@@ -63,12 +65,16 @@ function lerCelula(id: string, data: Record<string, unknown>): CelulaGrade {
   }
 }
 
-async function substituirFirebase(semanaId: string, geradas: ResultadoGeracao['celulas']) {
-  const db = getFirebaseDb()
+async function removerCelulasFirebase(semanaId: string) {
   const snap = await getDocs(
-    query(collection(db, COLECAO), where('semanaId', '==', semanaId)),
+    query(collection(getFirebaseDb(), COLECAO), where('semanaId', '==', semanaId)),
   )
   await Promise.all(snap.docs.map((documento) => deleteDoc(documento.ref)))
+}
+
+async function substituirFirebase(semanaId: string, geradas: ResultadoGeracao['celulas']) {
+  await removerCelulasFirebase(semanaId)
+  const db = getFirebaseDb()
   const gravadas: CelulaGrade[] = []
   for (const celula of geradas) {
     const campos = {
@@ -114,8 +120,15 @@ export function createFirebaseCelulasService(): CelulasService {
       )
       return snap.docs.map((documento) => lerCelula(documento.id, documento.data()))
     },
+    async limpar(semanaId) {
+      if (!isFirebaseConfigured()) return
+      await removerCelulasFirebase(semanaId)
+    },
     async gerar(entrada) {
-      const resultado = gerarSemana(entrada)
+      const resultado = gerarSemana({
+        ...entrada,
+        inicio: inicioGeracaoFromModo(entrada.semana.modoRotacao),
+      })
       if (!isFirebaseConfigured()) {
         return {
           ...resultado,
@@ -153,8 +166,14 @@ export function createMemoryCelulasService(iniciais: CelulaGrade[] = []): Celula
     async listarDaSemana(semanaId) {
       return itens.filter((item) => item.semanaId === semanaId)
     },
+    async limpar(semanaId) {
+      itens = itens.filter((item) => item.semanaId !== semanaId)
+    },
     async gerar(entrada) {
-      const resultado = gerarSemana(entrada)
+      const resultado = gerarSemana({
+        ...entrada,
+        inicio: inicioGeracaoFromModo(entrada.semana.modoRotacao),
+      })
       itens = itens.filter((item) => item.semanaId !== entrada.semana.id)
       const celulas = resultado.celulas.map((celula) => {
         seq += 1

@@ -21,6 +21,7 @@ const semanaMemoria: SemanaEscala = {
   estado: 'rascunho',
   feriados: [],
   exibirHorarioPlantao: true,
+  modoRotacao: 'alfabetica',
   ancoraTitular: 1,
   ancoraSuplente: 1,
 }
@@ -211,7 +212,7 @@ describe('guardas de rota', () => {
         session: { uid: 'u3d', email: 'editor@exemplo.com' },
         papel: 'editor',
       },
-      [semanaMemoria],
+      [{ ...semanaMemoria, modoRotacao: 'cadastro' }],
       oficiais,
       celulas,
     )
@@ -229,6 +230,7 @@ describe('guardas de rota', () => {
     expect(
       await screen.findByRole('heading', { name: /parâmetros da semana/i }),
     ).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /cadastro \(filas\)/i })).toBeChecked()
     expect(screen.getByLabelText(/âncora dos titulares/i)).toHaveValue(8)
     expect(screen.getByLabelText(/âncora dos suplentes/i)).toHaveValue(2)
   })
@@ -419,6 +421,34 @@ describe('guardas de rota', () => {
     )
     await user.click(await screen.findByRole('button', { name: /^gerar$/i }))
     expect(await screen.findAllByRole('combobox')).not.toHaveLength(0)
+  })
+
+  it('gerar semana vazia começa pelo primeiro nome', async () => {
+    const user = userEvent.setup()
+    const oficiais: Oficial[] = [
+      { id: 'z', nome: 'Zeca', foraDaRotacao: false, ordemTitular: 1, ordemSuplente: 1 },
+      { id: 'a', nome: 'Ana', foraDaRotacao: false, ordemTitular: 2, ordemSuplente: 2 },
+      ...Array.from({ length: 6 }, (_, i) => ({
+        id: `o${i + 3}`,
+        nome: `Oficial ${i + 3}`,
+        foraDaRotacao: false,
+        ordemTitular: i + 3,
+        ordemSuplente: i + 3,
+      })),
+    ]
+    renderRota(
+      '/editor/semanas/s1',
+      {
+        configured: true,
+        session: { uid: 'u7', email: 'editor@exemplo.com' },
+        papel: 'editor',
+      },
+      [semanaMemoria],
+      oficiais,
+    )
+    await user.click(await screen.findByRole('button', { name: /^gerar$/i }))
+    const [primeiro] = await screen.findAllByRole('combobox')
+    expect(primeiro).toHaveValue('a')
   })
 
   it('leitor em /leitor vê semanas sem Gerar', async () => {

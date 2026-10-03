@@ -1,19 +1,21 @@
-import { type FormEvent, useEffect, useState } from 'react'
+import { type FormEvent, useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
 
 import { CampoData } from '@/components/campo-data'
 import { editorNavHover, EditorNavButton } from '@/components/editor-menu'
+import { SecaoRotacaoSemana } from '@/components/secao-rotacao-semana'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useCelulasService } from '@/hooks/celulas-context'
 import { useSemanasService } from '@/hooks/semanas-context'
 import {
   formatarDiaBr,
   formatarIntervaloBr,
   semanaVisivelNaLista,
+  type ModoRotacao,
   type SemanaEscala,
 } from '@/lib/escala'
 import { GradeSemana } from '@/pages/grade-page'
@@ -29,15 +31,22 @@ export function SemanaPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const servico = useSemanasService()
+  const celulasServico = useCelulasService()
   const [semana, setSemana] = useState<SemanaEscala | null>(null)
   const [pronta, setPronta] = useState(false)
   const [mostrarEsqueleto, setMostrarEsqueleto] = useState(false)
+  const [temCelulas, setTemCelulas] = useState(false)
   const [feriados, setFeriados] = useState<string[]>([])
   const [novoFeriado, setNovoFeriado] = useState('')
+  const [modoRotacao, setModoRotacao] = useState<ModoRotacao>('alfabetica')
   const [ancoraTitular, setAncoraTitular] = useState('1')
   const [ancoraSuplente, setAncoraSuplente] = useState('1')
   const [exibirHorario, setExibirHorario] = useState(true)
   const [aGravar, setAGravar] = useState(false)
+
+  const aoMudarCelulas = useCallback((quantidade: number) => {
+    setTemCelulas(quantidade > 0)
+  }, [])
 
   useEffect(() => {
     if (!id) {
@@ -48,9 +57,8 @@ export function SemanaPage() {
     const atraso = window.setTimeout(() => {
       if (!cancelado) setMostrarEsqueleto(true)
     }, 150)
-    void servico
-      .obter(id)
-      .then((encontrada) => {
+    void Promise.all([servico.obter(id), celulasServico.listarDaSemana(id)])
+      .then(([encontrada, celulas]) => {
         if (cancelado) return
         if (!encontrada) {
           toast.error('Semana não encontrada.')
@@ -63,7 +71,9 @@ export function SemanaPage() {
           return
         }
         setSemana(encontrada)
+        setTemCelulas(celulas.length > 0)
         setFeriados(encontrada.feriados)
+        setModoRotacao(encontrada.modoRotacao)
         setAncoraTitular(String(encontrada.ancoraTitular))
         setAncoraSuplente(String(encontrada.ancoraSuplente))
         setExibirHorario(encontrada.exibirHorarioPlantao)
@@ -82,7 +92,7 @@ export function SemanaPage() {
       cancelado = true
       window.clearTimeout(atraso)
     }
-  }, [id, navigate, servico])
+  }, [celulasServico, id, navigate, servico])
 
   function acrescentarFeriado() {
     if (!novoFeriado) return
@@ -100,6 +110,7 @@ export function SemanaPage() {
       const gravada = await servico.atualizar(id, {
         feriados,
         exibirHorarioPlantao: exibirHorario,
+        ...(temCelulas ? {} : { modoRotacao }),
         ancoraTitular: Number(ancoraTitular),
         ancoraSuplente: Number(ancoraSuplente),
       })
@@ -164,28 +175,15 @@ export function SemanaPage() {
           </ul>
         ) : null}
 
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="semana-ancora-titular">Âncora dos titulares</Label>
-          <Input
-            id="semana-ancora-titular"
-            type="number"
-            min={1}
-            step={1}
-            value={ancoraTitular}
-            onChange={(event) => setAncoraTitular(event.target.value)}
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="semana-ancora-suplente">Âncora dos suplentes</Label>
-          <Input
-            id="semana-ancora-suplente"
-            type="number"
-            min={1}
-            step={1}
-            value={ancoraSuplente}
-            onChange={(event) => setAncoraSuplente(event.target.value)}
-          />
-        </div>
+        <SecaoRotacaoSemana
+          modo={temCelulas ? semana.modoRotacao : modoRotacao}
+          onModoChange={setModoRotacao}
+          bloqueado={temCelulas}
+          ancoraTitular={ancoraTitular}
+          ancoraSuplente={ancoraSuplente}
+          onAncoraTitularChange={setAncoraTitular}
+          onAncoraSuplenteChange={setAncoraSuplente}
+        />
         <div className="flex items-center gap-2">
           <Checkbox
             id="semana-horario"
@@ -204,7 +202,7 @@ export function SemanaPage() {
         </Button>
       </form>
 
-      <GradeSemana semana={semana} />
+      <GradeSemana key={semana.id} semana={semana} onCelulasChange={aoMudarCelulas} />
 
       <EditorNavButton to="/editor/semanas">Voltar às semanas</EditorNavButton>
     </section>

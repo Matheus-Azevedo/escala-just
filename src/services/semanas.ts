@@ -9,6 +9,7 @@ import {
 } from 'firebase/firestore'
 
 import {
+  lerModoRotacao,
   mensagemSemana,
   validarEscritaSemana,
   type EstadoSemana,
@@ -58,6 +59,7 @@ function lerSemana(id: string, data: Record<string, unknown>): SemanaEscala {
     estado: lerEstado(data.estado),
     feriados,
     exibirHorarioPlantao: data.exibirHorarioPlantao !== false,
+    modoRotacao: lerModoRotacao(data.modoRotacao),
     ancoraTitular: Number(data.ancoraTitular) || 1,
     ancoraSuplente: Number(data.ancoraSuplente) || 1,
   }
@@ -70,6 +72,7 @@ function payload(semana: Omit<SemanaEscala, 'id'>) {
     estado: semana.estado,
     feriados: semana.feriados,
     exibirHorarioPlantao: semana.exibirHorarioPlantao,
+    modoRotacao: semana.modoRotacao,
     ancoraTitular: semana.ancoraTitular,
     ancoraSuplente: semana.ancoraSuplente,
   }
@@ -90,6 +93,7 @@ function aplicarDraft(
     estado: atual?.estado ?? ('rascunho' as const),
     feriados: validacao.feriados,
     exibirHorarioPlantao: validacao.exibirHorarioPlantao,
+    modoRotacao: validacao.modoRotacao,
     ancoraTitular: validacao.ancoraTitular,
     ancoraSuplente: validacao.ancoraSuplente,
   }

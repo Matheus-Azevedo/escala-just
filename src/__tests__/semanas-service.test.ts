@@ -13,6 +13,7 @@ const existente: SemanaEscala = {
   estado: 'rascunho',
   feriados: [],
   exibirHorarioPlantao: true,
+  modoRotacao: 'cadastro',
   ancoraTitular: 1,
   ancoraSuplente: 1,
 }
@@ -24,6 +25,7 @@ describe('serviço de semanas (memory)', () => {
     expect(criada.estado).toBe('rascunho')
     expect(criada.dataInicio).toBe('2026-09-14')
     expect(criada.dataFim).toBe('2026-09-18')
+    expect(criada.modoRotacao).toBe('alfabetica')
     expect(criada.ancoraTitular).toBe(1)
     expect(criada.ancoraSuplente).toBe(1)
     expect(criada.exibirHorarioPlantao).toBe(true)

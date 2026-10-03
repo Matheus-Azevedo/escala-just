@@ -16,6 +16,7 @@ const semana: SemanaEscala = {
   estado: 'rascunho',
   feriados: [],
   exibirHorarioPlantao: true,
+  modoRotacao: 'cadastro',
   ancoraTitular: 1,
   ancoraSuplente: 1,
 }

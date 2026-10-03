@@ -1,4 +1,5 @@
 import { gerarSemana } from './gerar'
+import { inicioGeracaoFromModo } from './semana'
 import type { Ausencia, Oficial, Permuta, SemanaEscala } from './types'
 
 export function semanaOrigemContinuacao(
@@ -22,6 +23,7 @@ export function ancorasContinuacao(entrada: {
     oficiais: entrada.oficiais,
     ausencias: entrada.ausencias,
     permutas: entrada.permutas,
+    inicio: inicioGeracaoFromModo(entrada.origem.modoRotacao),
   })
   return {
     ancoraTitular: resultado.proximaAncoraTitular,

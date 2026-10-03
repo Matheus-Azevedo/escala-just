@@ -10,6 +10,7 @@ const semana: SemanaEscala = {
   estado: 'rascunho',
   feriados: [],
   exibirHorarioPlantao: true,
+  modoRotacao: 'cadastro',
   ancoraTitular: 1,
   ancoraSuplente: 1,
 }
@@ -89,6 +90,33 @@ describe('serviço de células (memory)', () => {
     ).rejects.toThrow(/titular e suplente/i)
     const lista = await servico.listarDaSemana('s1')
     expect(lista.find((item) => item.id === suplente.id)?.oficialId).toBe(suplente.oficialId)
+  })
+
+  it('limpar remove células da semana', async () => {
+    const servico = createMemoryCelulasService()
+    await servico.gerar({ semana, oficiais, ausencias: [], permutas: [] })
+    expect(await servico.listarDaSemana('s1')).toHaveLength(25)
+    await servico.limpar('s1')
+    expect(await servico.listarDaSemana('s1')).toHaveLength(0)
+  })
+
+  it('gerar alfabético persiste o primeiro nome', async () => {
+    const servico = createMemoryCelulasService()
+    const lista: Oficial[] = [
+      { id: 'z', nome: 'Zeca', foraDaRotacao: false, ordemTitular: 1, ordemSuplente: 1 },
+      { id: 'a', nome: 'Ana', foraDaRotacao: false, ordemTitular: 2, ordemSuplente: 2 },
+      ...oficiais.slice(2),
+    ]
+    const gerado = await servico.gerar({
+      semana: { ...semana, modoRotacao: 'alfabetica' },
+      oficiais: lista,
+      ausencias: [],
+      permutas: [],
+    })
+    const primeiro = gerado.celulas.find(
+      (item) => item.data === '2026-09-14' && item.papel === 'titular' && item.posicao === 1,
+    )
+    expect(primeiro?.oficialId).toBe('a')
   })
 })
 

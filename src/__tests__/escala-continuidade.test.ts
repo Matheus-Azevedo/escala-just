@@ -15,6 +15,7 @@ const semanaAnterior: SemanaEscala = {
   estado: 'rascunho',
   feriados: [],
   exibirHorarioPlantao: true,
+  modoRotacao: 'cadastro',
   ancoraTitular: 1,
   ancoraSuplente: 1,
 }
@@ -69,6 +70,37 @@ describe('continuidade de âncoras', () => {
     expect(
       semanaOrigemContinuacao([semanaAnterior], new Set(), '2026-09-21'),
     ).toBeUndefined()
+  })
+
+  it('continuidade alfabética usa fila por nome', () => {
+    const oficiaisAlfa: Oficial[] = [
+      { id: 'z', nome: 'Zeca', foraDaRotacao: false, ordemTitular: 1, ordemSuplente: 1 },
+      { id: 'a', nome: 'Ana', foraDaRotacao: false, ordemTitular: 2, ordemSuplente: 2 },
+      ...oficiais(6).slice(2),
+    ]
+    const origem: SemanaEscala = {
+      ...semanaAnterior,
+      modoRotacao: 'alfabetica',
+    }
+    const ancoras = ancorasContinuacao({
+      origem,
+      oficiais: oficiaisAlfa,
+      ausencias: [],
+      permutas: [],
+    })
+    const gerada = gerarSemana({
+      semana: origem,
+      oficiais: oficiaisAlfa,
+      ausencias: [],
+      permutas: [],
+      inicio: 'alfabetico',
+    })
+    expect(ancoras.ancoraTitular).toBe(gerada.proximaAncoraTitular)
+    expect(
+      gerada.celulas.find(
+        (item) => item.data === '2026-09-14' && item.papel === 'titular' && item.posicao === 1,
+      )?.oficialId,
+    ).toBe('a')
   })
 
   it('não trata semana posterior como origem', () => {

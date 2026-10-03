@@ -59,6 +59,7 @@ export function HistoricoVersaoPage() {
           estado: 'rascunho',
           feriados: [],
           exibirHorarioPlantao: false,
+          modoRotacao: 'cadastro',
           ancoraTitular: 1,
           ancoraSuplente: 1,
         }

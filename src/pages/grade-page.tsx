@@ -54,10 +54,12 @@ export function GradeSemana({
   semana,
   consulta = false,
   celulasFixas,
+  onCelulasChange,
 }: {
   semana: SemanaEscala
   consulta?: boolean
   celulasFixas?: CelulaGrade[]
+  onCelulasChange?: (quantidade: number) => void
 }) {
   const oficiaisServico = useOficiaisService()
   const ausenciasServico = useAusenciasService()
@@ -69,6 +71,7 @@ export function GradeSemana({
   const [ausencias, setAusencias] = useState<Ausencia[]>([])
   const [celulas, setCelulas] = useState<CelulaGrade[]>([])
   const [aGerar, setAGerar] = useState(false)
+  const [aLimpar, setALimpar] = useState(false)
   const [aExportar, setAExportar] = useState<'csv' | 'pdf' | null>(null)
   const [ajustandoId, setAjustandoId] = useState<string | null>(null)
 
@@ -84,6 +87,7 @@ export function GradeSemana({
         setOficiais(listaOficiais)
         setAusencias(listaAusencias)
         setCelulas(listaCelulas)
+        onCelulasChange?.(listaCelulas.length)
       })
       .catch((cause: unknown) => {
         if (!cancelado) {
@@ -93,19 +97,20 @@ export function GradeSemana({
     return () => {
       cancelado = true
     }
-  }, [ausenciasServico, celulasFixas, celulasServico, oficiaisServico, semana.id])
+  }, [ausenciasServico, celulasFixas, celulasServico, oficiaisServico, onCelulasChange, semana.id])
 
   const dias = useMemo(() => diasUteisDaSemana(semana), [semana])
 
   async function gerar() {
     setAGerar(true)
-    const origem = celulas.length > 0 ? 'recalcular' : 'gerar'
     try {
-      const [listaOficiais, ausencias, permutas] = await Promise.all([
+      const [listaOficiais, ausencias, permutas, existentes] = await Promise.all([
         oficiaisServico.listar(),
         ausenciasServico.listar(),
         permutasServico.listar(),
+        celulasFixas ? Promise.resolve(celulasFixas) : celulasServico.listarDaSemana(semana.id),
       ])
+      const origem = existentes.length > 0 ? 'recalcular' : 'gerar'
       const resultado = await celulasServico.gerar({
         semana,
         oficiais: listaOficiais,
@@ -115,6 +120,7 @@ export function GradeSemana({
       setOficiais(listaOficiais)
       setAusencias(ausencias)
       setCelulas(resultado.celulas)
+      onCelulasChange?.(resultado.celulas.length)
       try {
         await versoesServico.guardar({
           semanaId: semana.id,
@@ -137,6 +143,21 @@ export function GradeSemana({
       toast.error(cause instanceof Error ? cause.message : 'Não foi possível gerar a grade.')
     } finally {
       setAGerar(false)
+    }
+  }
+
+  async function limpar() {
+    if (celulasFixas || celulas.length === 0) return
+    setALimpar(true)
+    try {
+      await celulasServico.limpar(semana.id)
+      setCelulas([])
+      onCelulasChange?.(0)
+      toast.success('Grade limpa.')
+    } catch (cause) {
+      toast.error(cause instanceof Error ? cause.message : 'Não foi possível limpar a grade.')
+    } finally {
+      setALimpar(false)
     }
   }
 
@@ -217,9 +238,26 @@ export function GradeSemana({
 
       <div className="flex flex-wrap gap-2 print:hidden">
         {!consulta ? (
-          <Button type="button" pending={aGerar} disabled={aGerar} onClick={() => void gerar()}>
-            {celulas.length > 0 ? 'Recalcular' : 'Gerar'}
-          </Button>
+          <>
+            <Button
+              type="button"
+              pending={aGerar}
+              disabled={aGerar || aLimpar}
+              onClick={() => void gerar()}
+            >
+              {celulas.length > 0 ? 'Recalcular' : 'Gerar'}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className={editorNavHover}
+              pending={aLimpar}
+              disabled={aLimpar || aGerar || celulas.length === 0 || aExportar !== null}
+              onClick={() => void limpar()}
+            >
+              Limpar
+            </Button>
+          </>
         ) : null}
         <Button
           type="button"
