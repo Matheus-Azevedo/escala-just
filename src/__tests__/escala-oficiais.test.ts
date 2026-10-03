@@ -32,13 +32,17 @@ function ativos(quantidade: number): Oficial[] {
 }
 
 describe('funções puras de oficiais', () => {
-  it('recusa o 25.º ativo e aceita fora da rotação', () => {
+  it('aceita o 30.º ativo, recusa o 31.º e aceita fora da rotação', () => {
+    const quase = ativos(TETO_ROTACAO - 1)
+    expect(validarEscritaOficial(quase, { nome: 'Trigésimo', foraDaRotacao: false }).ok).toBe(
+      true,
+    )
     const lista = ativos(TETO_ROTACAO)
     expect(podeIncluirNaRotacao(lista, { foraDaRotacao: false })).toBe(false)
     expect(podeIncluirNaRotacao(lista, { foraDaRotacao: true })).toBe(true)
     expect(validarEscritaOficial(lista, { nome: 'Novo', foraDaRotacao: false })).toEqual({
       ok: false,
-      erro: 'teto-24',
+      erro: 'teto-rotacao',
     })
     expect(validarEscritaOficial(lista, { nome: 'Sindicato', foraDaRotacao: true }).ok).toBe(
       true,

@@ -15,7 +15,7 @@ export type OficialDraft = {
   ordemSuplente?: number
 }
 
-export type OficialErro = 'nome-vazio' | 'nome-duplicado' | 'teto-24'
+export type OficialErro = 'nome-vazio' | 'nome-duplicado' | 'teto-rotacao'
 
 export type EstadoSemana = 'rascunho' | 'validada' | 'arquivada'
 
@@ -116,7 +116,7 @@ export type VersaoEscala = {
   celulas: CelulaGrade[]
 }
 
-export const TETO_ROTACAO = 24
+export const TETO_ROTACAO = 30
 
 export function isPapel(value: unknown): value is Papel {
   return value === 'editor' || value === 'leitor'

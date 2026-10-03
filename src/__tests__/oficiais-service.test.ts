@@ -27,7 +27,7 @@ describe('serviço de oficiais (memory)', () => {
     expect(lista[0]?.id).toBe(criado.id)
   })
 
-  it('não persiste o 25.º ativo', async () => {
+  it('não persiste o 31.º ativo', async () => {
     const servico = createMemoryOficiaisService(ativos(TETO_ROTACAO))
     await expect(servico.criar({ nome: 'Extra', foraDaRotacao: false })).rejects.toBeInstanceOf(
       OficiaisValidacaoError,
@@ -35,7 +35,7 @@ describe('serviço de oficiais (memory)', () => {
     expect(await servico.listar()).toHaveLength(TETO_ROTACAO)
   })
 
-  it('persiste fora da rotação quando já há 24 ativos', async () => {
+  it('persiste fora da rotação quando já há 30 ativos', async () => {
     const servico = createMemoryOficiaisService(ativos(TETO_ROTACAO))
     const criado = await servico.criar({
       nome: 'Presidente sindicato',

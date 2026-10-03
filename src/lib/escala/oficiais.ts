@@ -61,7 +61,7 @@ export function ordenarPorNome(oficiais: Oficial[]): Oficial[] {
 export function mensagemOficial(erro: OficialErro): string {
   if (erro === 'nome-vazio') return 'Informe o nome do oficial.'
   if (erro === 'nome-duplicado') return 'Já existe um oficial com este nome.'
-  return 'A rotação admite no máximo 24 oficiais.'
+  return `A rotação admite no máximo ${TETO_ROTACAO} oficiais.`
 }
 
 export function validarEscritaOficial(
@@ -74,7 +74,7 @@ export function validarEscritaOficial(
   if (nomeDuplicado(nome, lista, exceptId)) return { ok: false, erro: 'nome-duplicado' }
   const foraDaRotacao = draft.foraDaRotacao ?? false
   if (!podeIncluirNaRotacao(lista, { foraDaRotacao, id: exceptId })) {
-    return { ok: false, erro: 'teto-24' }
+    return { ok: false, erro: 'teto-rotacao' }
   }
   return { ok: true, nome }
 }
