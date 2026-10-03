@@ -83,7 +83,7 @@ export function escalaParaPdf(
   semana: SemanaEscala,
   celulas: CelulaGrade[],
   oficiais: Oficial[],
-): Uint8Array {
+): ArrayBuffer {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4', compress: false })
   const dias = diasUteisDaSemana(semana)
   const margem = 10
@@ -121,5 +121,5 @@ export function escalaParaPdf(
 
   desenharLinha(cabecalho, true)
   for (const linha of linhas) desenharLinha(linha, false)
-  return new Uint8Array(doc.output('arraybuffer'))
+  return doc.output('arraybuffer')
 }

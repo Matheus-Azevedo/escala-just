@@ -53,13 +53,13 @@ describe('exportar escala', () => {
   })
 
   it('gera PDF com titulares e suplentes', () => {
-    const bytes = escalaParaPdf(
+    const buffer = escalaParaPdf(
       semana,
       [celula({ papel: 'titular', posicao: 1 })],
       oficiais,
     )
-    const texto = new TextDecoder('latin1').decode(bytes)
-    expect(bytes.byteLength).toBeGreaterThan(100)
+    const texto = new TextDecoder('latin1').decode(buffer)
+    expect(buffer.byteLength).toBeGreaterThan(100)
     expect(texto).toContain('Juizado')
     expect(texto).toContain('Suplente')
   })

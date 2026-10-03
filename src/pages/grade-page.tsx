@@ -188,10 +188,10 @@ export function GradeSemana({
         descarregar(nomeFicheiro('csv'), new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' }))
         toast.success('CSV descarregado.')
       } else {
-        const bytes = escalaParaPdf(semana, celulas, oficiais)
+        const buffer = escalaParaPdf(semana, celulas, oficiais)
         descarregar(
           nomeFicheiro('pdf'),
-          new Blob([bytes], { type: 'application/pdf' }),
+          new Blob([buffer], { type: 'application/pdf' }),
         )
         toast.success('PDF descarregado.')
       }
