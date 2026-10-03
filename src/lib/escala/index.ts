@@ -69,6 +69,7 @@ export {
   validarCriacaoSemana,
   validarEscritaSemana,
 } from './semana'
+export { rotuloVaraTitular } from './varas'
 export {
   TETO_ROTACAO,
   isPapel,

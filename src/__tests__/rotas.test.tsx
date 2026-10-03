@@ -557,6 +557,33 @@ describe('guardas de rota', () => {
     expect(screen.getByRole('button', { name: /exportar csv/i })).toBeInTheDocument()
   })
 
+  it('a grade do editor mostra a vara só nos titulares', async () => {
+    const celulas: CelulaGrade[] = [1, 2].map((posicao) => ({
+      id: `c${posicao}`,
+      semanaId: 's1',
+      data: '2026-09-14',
+      papel: posicao === 1 ? 'titular' : 'suplente',
+      posicao: 1,
+      oficialId: '',
+    }))
+    renderRota(
+      '/editor/semanas/s1',
+      {
+        configured: true,
+        session: { uid: 'u18', email: 'editor@exemplo.com' },
+        papel: 'editor',
+      },
+      [semanaMemoria],
+      [],
+      celulas,
+    )
+    expect(await screen.findByText(/titular 1 — juizado da infância e juventude/i)).toBeInTheDocument()
+    expect(screen.getByText(/titular 2 — 2\.ª vara de família e 3\.ª vara cível/i)).toBeInTheDocument()
+    expect(screen.getByText(/titular 3 — 2\.ª vara criminal/i)).toBeInTheDocument()
+    expect(screen.getByText(/^suplente 1$/i)).toBeInTheDocument()
+    expect(screen.getByText(/^suplente 2$/i)).toBeInTheDocument()
+  })
+
   it('editor em /editor/semanas/:id/grade vai para os detalhes da semana', async () => {
     renderRota(
       '/editor/semanas/s1/grade',

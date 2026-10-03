@@ -18,6 +18,7 @@ import {
   mensagemExportar,
   oficiaisElegiveisParaCelula,
   podeExportarEscala,
+  rotuloVaraTitular,
   type Ausencia,
   type CelulaGrade,
   type Oficial,
@@ -243,7 +244,9 @@ export function GradeSemana({
                       : 'px-2 py-2 font-normal'
                   }
                 >
-                  {linha.rotulo}
+                  {linha.papel === 'titular'
+                    ? `${linha.rotulo} — ${rotuloVaraTitular(linha.posicao)}`
+                    : linha.rotulo}
                 </th>
                 {dias.map((dia) => {
                   const celula = celulaEm(celulas, dia, linha.papel, linha.posicao)
