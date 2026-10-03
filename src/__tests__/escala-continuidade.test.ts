@@ -72,6 +72,44 @@ describe('continuidade de âncoras', () => {
     ).toBeUndefined()
   })
 
+  it('continuidade alfabética gera a semana seguinte no índice herdado', () => {
+    const oficiaisAlfa: Oficial[] = [
+      { id: 'z', nome: 'Zeca', foraDaRotacao: false, ordemTitular: 1, ordemSuplente: 1 },
+      { id: 'a', nome: 'Ana', foraDaRotacao: false, ordemTitular: 2, ordemSuplente: 2 },
+      ...oficiais(6).slice(2),
+    ]
+    const origem: SemanaEscala = {
+      ...semanaAnterior,
+      modoRotacao: 'alfabetica',
+    }
+    const ancoras = ancorasContinuacao({
+      origem,
+      oficiais: oficiaisAlfa,
+      ausencias: [],
+      permutas: [],
+    })
+    const novaSemana: SemanaEscala = {
+      ...semanaAnterior,
+      id: 's2',
+      dataInicio: '2026-09-21',
+      dataFim: '2026-09-25',
+      modoRotacao: 'alfabetica',
+      ancoraTitular: ancoras.ancoraTitular,
+      ancoraSuplente: ancoras.ancoraSuplente,
+    }
+    const gerada = gerarSemana({
+      semana: novaSemana,
+      oficiais: oficiaisAlfa,
+      ausencias: [],
+      permutas: [],
+      inicio: 'alfabetico',
+    })
+    expect(gerada.celulas.find(
+      (item) => item.data === '2026-09-21' && item.papel === 'titular' && item.posicao === 1,
+    )?.oficialId).not.toBe('a')
+    expect(ancoras.ancoraTitular).toBeGreaterThan(1)
+  })
+
   it('continuidade alfabética usa fila por nome', () => {
     const oficiaisAlfa: Oficial[] = [
       { id: 'z', nome: 'Zeca', foraDaRotacao: false, ordemTitular: 1, ordemSuplente: 1 },

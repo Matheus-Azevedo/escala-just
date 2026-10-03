@@ -168,6 +168,17 @@ describe('gerarSemana', () => {
     expect(celula(resultado, '2026-09-14', 'titular', 1)?.oficialId).toBe('b')
   })
 
+  it('alfabética com âncora herdada continua a fila A–Z', () => {
+    const resultado = gerarSemana({
+      semana: { ...semana, ancoraTitular: 3, ancoraSuplente: 1 },
+      oficiais: oficiaisForaDeOrdem(),
+      ausencias: [],
+      permutas: [],
+      inicio: 'alfabetico',
+    })
+    expect(celula(resultado, '2026-09-14', 'titular', 1)?.oficialId).toBe('c')
+  })
+
   it('permuta não reordena o resto da fila alfabética', () => {
     const permutas: Permuta[] = [
       {

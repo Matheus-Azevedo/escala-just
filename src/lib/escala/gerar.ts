@@ -159,10 +159,10 @@ export function gerarSemana(entrada: {
     ? filaAlfabetica(entrada.oficiais)
     : filaRotacao(entrada.oficiais, 'ordemSuplente')
   const cursorTitular = {
-    i: alfabetico ? 0 : Math.max(0, entrada.semana.ancoraTitular - 1),
+    i: Math.max(0, entrada.semana.ancoraTitular - 1),
   }
   const cursorSuplente = {
-    i: alfabetico ? 0 : Math.max(0, entrada.semana.ancoraSuplente - 1),
+    i: Math.max(0, entrada.semana.ancoraSuplente - 1),
   }
 
   const celulas: CelulaGerada[] = []
