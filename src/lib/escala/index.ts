@@ -49,6 +49,7 @@ export {
 } from './ajuste'
 export {
   escalaParaCsv,
+  escalaParaPdf,
   mensagemExportar,
   podeExportarEscala,
   type ExportarErro,

@@ -13,6 +13,7 @@ import { usePermutasService } from '@/hooks/permutas-context'
 import {
   diasUteisDaSemana,
   escalaParaCsv,
+  escalaParaPdf,
   formatarDiaBr,
   formatarIntervaloBr,
   mensagemExportar,
@@ -68,7 +69,7 @@ export function GradeSemana({
   const [ausencias, setAusencias] = useState<Ausencia[]>([])
   const [celulas, setCelulas] = useState<CelulaGrade[]>([])
   const [aGerar, setAGerar] = useState(false)
-  const [aExportar, setAExportar] = useState(false)
+  const [aExportar, setAExportar] = useState<'csv' | 'pdf' | null>(null)
   const [ajustandoId, setAjustandoId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -160,27 +161,44 @@ export function GradeSemana({
     }
   }
 
-  function exportarCsv() {
+  function descarregar(nome: string, blob: Blob) {
+    const url = URL.createObjectURL(blob)
+    const ligacao = document.createElement('a')
+    ligacao.href = url
+    ligacao.download = nome
+    ligacao.click()
+    URL.revokeObjectURL(url)
+  }
+
+  function nomeFicheiro(extensao: 'csv' | 'pdf') {
+    const intervalo = formatarIntervaloBr(semana.dataInicio, semana.dataFim).replaceAll('/', '-')
+    return `escala-${intervalo}.${extensao}`
+  }
+
+  function exportar(formato: 'csv' | 'pdf') {
     const guarda = podeExportarEscala(celulas)
     if (!guarda.ok) {
       toast.error(mensagemExportar(guarda.erro))
       return
     }
-    setAExportar(true)
+    setAExportar(formato)
     try {
-      const csv = escalaParaCsv(semana, celulas, oficiais)
-      const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' })
-      const url = URL.createObjectURL(blob)
-      const ligacao = document.createElement('a')
-      ligacao.href = url
-      ligacao.download = `escala-${formatarIntervaloBr(semana.dataInicio, semana.dataFim).replaceAll('/', '-')}.csv`
-      ligacao.click()
-      URL.revokeObjectURL(url)
-      toast.success('CSV descarregado.')
+      if (formato === 'csv') {
+        const csv = escalaParaCsv(semana, celulas, oficiais)
+        descarregar(nomeFicheiro('csv'), new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' }))
+        toast.success('CSV descarregado.')
+      } else {
+        const bytes = escalaParaPdf(semana, celulas, oficiais)
+        descarregar(
+          nomeFicheiro('pdf'),
+          new Blob([bytes], { type: 'application/pdf' }),
+        )
+        toast.success('PDF descarregado.')
+      }
     } catch (cause) {
       toast.error(cause instanceof Error ? cause.message : 'Não foi possível exportar.')
     } finally {
-      setAExportar(false)
+      setAExportar(null)
     }
   }
 
@@ -207,11 +225,21 @@ export function GradeSemana({
           type="button"
           variant="outline"
           className={editorNavHover}
-          pending={aExportar}
-          disabled={aExportar}
-          onClick={() => exportarCsv()}
+          pending={aExportar === 'csv'}
+          disabled={aExportar !== null}
+          onClick={() => exportar('csv')}
         >
           Exportar CSV
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          className={editorNavHover}
+          pending={aExportar === 'pdf'}
+          disabled={aExportar !== null}
+          onClick={() => exportar('pdf')}
+        >
+          Exportar PDF
         </Button>
       </div>
 

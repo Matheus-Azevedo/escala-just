@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   escalaParaCsv,
+  escalaParaPdf,
   podeExportarEscala,
   type CelulaGrade,
   type Oficial,
@@ -45,8 +46,22 @@ describe('exportar escala', () => {
       [celula({ papel: 'titular', posicao: 1 })],
       oficiais,
     )
-    expect(csv.startsWith('Dia;Vaga;Oficial')).toBe(true)
-    expect(csv).toContain('14/09/2026;Titular 1;Ana Silva')
+    expect(csv.startsWith('Vaga;14/09/2026;')).toBe(true)
+    expect(csv).toContain('Titular 1 — Juizado da Infância e Juventude')
+    expect(csv).toContain('Ana Silva')
+    expect(csv).toContain('Suplente 1')
+  })
+
+  it('gera PDF com titulares e suplentes', () => {
+    const bytes = escalaParaPdf(
+      semana,
+      [celula({ papel: 'titular', posicao: 1 })],
+      oficiais,
+    )
+    const texto = new TextDecoder('latin1').decode(bytes)
+    expect(bytes.byteLength).toBeGreaterThan(100)
+    expect(texto).toContain('Juizado')
+    expect(texto).toContain('Suplente')
   })
 
   it('recusa RN-006', () => {
