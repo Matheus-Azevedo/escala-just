@@ -40,6 +40,12 @@ describe('serviço de semanas (memory)', () => {
     expect(await servico.listar()).toHaveLength(1)
   })
 
+  it('remove o documento da semana', async () => {
+    const servico = createMemorySemanasService([existente])
+    await servico.remover('s1')
+    expect(await servico.listar()).toEqual([])
+  })
+
   it('não persiste feriado fora da semana', async () => {
     const servico = createMemorySemanasService([existente])
     await expect(

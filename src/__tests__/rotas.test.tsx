@@ -236,6 +236,62 @@ describe('guardas de rota', () => {
     expect(screen.getByLabelText(/âncora dos suplentes/i)).toHaveValue(2)
   })
 
+  it('criar a mesma segunda mostra erro e não duplica a linha', async () => {
+    const user = userEvent.setup()
+    renderRota(
+      '/editor/semanas',
+      {
+        configured: true,
+        session: { uid: 'u21a', email: 'editor@exemplo.com' },
+        papel: 'editor',
+      },
+      [semanaMemoria],
+    )
+    expect(await screen.findByText('14/09/2026 a 18/09/2026')).toBeInTheDocument()
+    await user.type(screen.getByLabelText(/data de referência/i), '16/09/2026')
+    await user.click(screen.getByRole('button', { name: /criar semana/i }))
+    expect(
+      await screen.findByText(/já existe uma semana com esta segunda-feira/i),
+    ).toBeInTheDocument()
+    expect(screen.getAllByText('14/09/2026 a 18/09/2026')).toHaveLength(1)
+  })
+
+  it('remover tira a semana visível da lista', async () => {
+    const user = userEvent.setup()
+    renderRota(
+      '/editor/semanas',
+      {
+        configured: true,
+        session: { uid: 'u21b', email: 'editor@exemplo.com' },
+        papel: 'editor',
+      },
+      [semanaMemoria],
+    )
+    expect(await screen.findByRole('button', { name: /^remover$/i })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /^remover$/i }))
+    expect(await screen.findByText(/rascunho removido/i)).toBeInTheDocument()
+    expect(screen.queryByText('14/09/2026 a 18/09/2026')).not.toBeInTheDocument()
+  })
+
+  it('período não cria segunda segunda para a mesma dataInicio', async () => {
+    const user = userEvent.setup()
+    renderRota(
+      '/editor/semanas?aba=periodo',
+      {
+        configured: true,
+        session: { uid: 'u21c', email: 'editor@exemplo.com' },
+        papel: 'editor',
+      },
+      [semanaMemoria],
+    )
+    expect(await screen.findByLabelText(/^recorte$/i)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /criar semanas/i }))
+    expect(await screen.findByText(/4 semanas prontas no período/i)).toBeInTheDocument()
+    expect(screen.getAllByText('14/09/2026 a 18/09/2026')).toHaveLength(1)
+    expect(screen.getByText('07/09/2026 a 11/09/2026')).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: /detalhes/i })).toHaveLength(4)
+  })
+
   it('editor autenticado vê T-02 em /editor/semanas', async () => {
     renderRota('/editor/semanas', {
       configured: true,
