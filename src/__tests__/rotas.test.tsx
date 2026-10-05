@@ -689,7 +689,8 @@ describe('guardas de rota', () => {
     expect(screen.getByRole('heading', { name: /grade da semana/i })).toBeInTheDocument()
   })
 
-  it('editor vê o histórico e abre snapshot só-leitura', async () => {
+  it('editor vê escala passada no histórico e abre a grade só leitura', async () => {
+    vi.setSystemTime(new Date(2026, 8, 19, 12, 0, 0))
     const oficiais: Oficial[] = [
       {
         id: 'o1',
@@ -699,21 +700,13 @@ describe('guardas de rota', () => {
         ordemSuplente: 1,
       },
     ]
-    const versao: VersaoEscala = {
-      id: 'v1',
+    const celula: CelulaGrade = {
+      id: 'c1',
       semanaId: 's1',
-      criadoEm: '2026-09-20T12:00:00.000Z',
-      origem: 'gerar',
-      celulas: [
-        {
-          id: 'c1',
-          semanaId: 's1',
-          data: '2026-09-14',
-          papel: 'titular',
-          posicao: 1,
-          oficialId: 'o1',
-        },
-      ],
+      data: '2026-09-14',
+      papel: 'titular',
+      posicao: 1,
+      oficialId: 'o1',
     }
     renderRota(
       '/editor/historico',
@@ -724,16 +717,17 @@ describe('guardas de rota', () => {
       },
       [semanaMemoria],
       oficiais,
-      [],
-      [versao],
+      [celula],
     )
     expect(await screen.findByRole('heading', { name: /^histórico$/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /setembro 2026/i })).toBeInTheDocument()
+    expect(screen.getByText(/14\/09\/2026/)).toBeInTheDocument()
+    expect(screen.queryByText(/Gerar/)).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: /^abrir$/i })).toBeInTheDocument()
 
     cleanup()
     renderRota(
-      '/editor/historico/v1',
+      '/editor/historico/s1',
       {
         configured: true,
         session: { uid: 'u13', email: 'editor@exemplo.com' },
@@ -741,8 +735,7 @@ describe('guardas de rota', () => {
       },
       [semanaMemoria],
       oficiais,
-      [],
-      [versao],
+      [celula],
     )
     expect(await screen.findByText('Ana Silva')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /grade da semana/i })).toBeInTheDocument()

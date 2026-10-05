@@ -37,7 +37,9 @@ export {
   hojeIsoLista,
   rotuloMesAno,
   semanasDoPeriodo,
+  semanasPassadas,
   semanasVisiveisNaLista,
+  semanaPassada,
   semanaVisivelNaLista,
   type RecortePeriodo,
 } from './periodo'

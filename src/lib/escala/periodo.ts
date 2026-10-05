@@ -22,6 +22,20 @@ export function semanasVisiveisNaLista(
   return semanas.filter((semana) => semanaVisivelNaLista(semana, hojeIso))
 }
 
+export function semanaPassada(
+  semana: Pick<SemanaEscala, 'dataFim'>,
+  hojeIso: string = hojeIsoLista(),
+): boolean {
+  return semana.dataFim < hojeIso
+}
+
+export function semanasPassadas(
+  semanas: SemanaEscala[],
+  hojeIso: string = hojeIsoLista(),
+): SemanaEscala[] {
+  return semanas.filter((semana) => semanaPassada(semana, hojeIso))
+}
+
 export type RecortePeriodo =
   | { tipo: 'mes'; ano: number; mes: number }
   | { tipo: 'ano'; ano: number }
