@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 const ITENS = [
   { to: '/editor/semanas', label: 'Semanas' },
@@ -18,13 +19,15 @@ export function EditorNavButton({
   to,
   children,
   size,
+  className,
 }: {
   to: string
   children: ReactNode
   size?: 'default' | 'sm'
+  className?: string
 }) {
   return (
-    <Button asChild variant="outline" size={size} className={editorNavHover}>
+    <Button asChild variant="outline" size={size} className={cn(editorNavHover, className)}>
       <Link to={to}>{children}</Link>
     </Button>
   )

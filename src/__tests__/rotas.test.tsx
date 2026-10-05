@@ -508,9 +508,23 @@ describe('guardas de rota', () => {
     expect(primeiro).toHaveValue('a')
   })
 
-  it('leitor em /leitor vê semanas sem Gerar', async () => {
+  it('leitor em /leitor escolhe meus dias ou semanas', async () => {
     renderRota(
       '/leitor',
+      {
+        configured: true,
+        session: { uid: 'u10h', email: 'leitor@exemplo.com' },
+        papel: 'leitor',
+      },
+    )
+    expect(await screen.findByRole('heading', { name: /consulta da escala/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /meus dias/i })).toHaveAttribute('href', '/leitor/dias')
+    expect(screen.getByRole('link', { name: /^semanas$/i })).toHaveAttribute('href', '/leitor/semanas')
+  })
+
+  it('leitor em /leitor/semanas vê semanas sem Gerar', async () => {
+    renderRota(
+      '/leitor/semanas',
       {
         configured: true,
         session: { uid: 'u10', email: 'leitor@exemplo.com' },
@@ -526,20 +540,75 @@ describe('guardas de rota', () => {
         },
       ],
     )
-    expect(
-      await screen.findByRole('heading', { name: /consulta da escala/i }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /^semanas$/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /setembro 2026/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /agosto 2026/i })).toBeInTheDocument()
     expect(screen.getByText(/14\/09\/2026/)).toBeInTheDocument()
     expect(screen.getAllByRole('link', { name: /^consultar$/i }).length).toBeGreaterThanOrEqual(1)
     expect(screen.queryByRole('button', { name: /^gerar$/i })).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/nome do oficial/i)).not.toBeInTheDocument()
+  })
+
+  it('leitor pesquisa o nome e vê o dia com a vara do titular', async () => {
+    const user = userEvent.setup()
+    renderRota(
+      '/leitor/dias',
+      {
+        configured: true,
+        session: { uid: 'u23', email: 'leitor@exemplo.com' },
+        papel: 'leitor',
+      },
+      [semanaMemoria],
+      [
+        {
+          id: 'o1',
+          nome: 'Ana Silva',
+          foraDaRotacao: false,
+          ordemTitular: 1,
+          ordemSuplente: 1,
+        },
+      ],
+      [
+        {
+          id: 'c1',
+          semanaId: 's1',
+          data: '2026-09-15',
+          papel: 'titular',
+          posicao: 1,
+          oficialId: 'o1',
+        },
+        {
+          id: 'c2',
+          semanaId: 's1',
+          data: '2026-09-16',
+          papel: 'suplente',
+          posicao: 2,
+          oficialId: 'o1',
+        },
+        {
+          id: 'c3',
+          semanaId: 's1',
+          data: '2026-09-14',
+          papel: 'titular',
+          posicao: 1,
+          oficialId: 'o9',
+        },
+      ],
+    )
+    expect(await screen.findByLabelText(/nome do oficial/i)).toBeInTheDocument()
+    expect(screen.queryByText('15/09/2026')).not.toBeInTheDocument()
+    await user.type(screen.getByLabelText(/nome do oficial/i), 'ana')
+    expect(await screen.findByText('Ana Silva')).toBeInTheDocument()
+    expect(screen.getByText('15/09/2026')).toBeInTheDocument()
+    expect(screen.getByText(/titular 1 — juizado da infância e juventude/i)).toBeInTheDocument()
+    expect(screen.getByText(/suplente 2/i)).toBeInTheDocument()
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
   })
 
   it('listas escondem semana cuja sexta já passou', async () => {
     vi.setSystemTime(new Date(2026, 8, 16, 12, 0, 0))
     renderRota(
-      '/leitor',
+      '/leitor/semanas',
       {
         configured: true,
         session: { uid: 'u16l', email: 'leitor@exemplo.com' },

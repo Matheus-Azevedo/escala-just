@@ -76,6 +76,7 @@ export {
   validarCriacaoSemana,
   validarEscritaSemana,
 } from './semana'
+export { meusDias, oficiaisPorNome } from './meus-dias'
 export { rotuloVaraTitular } from './varas'
 export {
   TETO_ROTACAO,

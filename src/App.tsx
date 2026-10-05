@@ -14,8 +14,10 @@ import { PermutasProvider } from '@/hooks/permutas-context'
 import { SemanasProvider } from '@/hooks/semanas-context'
 import { VersoesProvider } from '@/hooks/versoes-context'
 import { EditorPage } from '@/pages/editor-page'
+import { LeitorDiasPage } from '@/pages/leitor-dias-page'
 import { LeitorPage } from '@/pages/leitor-page'
 import { LeitorSemanaPage } from '@/pages/leitor-semana-page'
+import { LeitorSemanasPage } from '@/pages/leitor-semanas-page'
 import { LoginPage } from '@/pages/login-page'
 import { OficiaisPage } from '@/pages/oficiais-page'
 import { AusenciasPage } from '@/pages/ausencias-page'
@@ -126,6 +128,22 @@ export function AppRoutes() {
         element={
           <RequireAuth>
             <LeitorPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/leitor/dias"
+        element={
+          <RequireAuth>
+            <LeitorDiasPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/leitor/semanas"
+        element={
+          <RequireAuth>
+            <LeitorSemanasPage />
           </RequireAuth>
         }
       />

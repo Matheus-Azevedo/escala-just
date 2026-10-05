@@ -71,8 +71,10 @@ export function LeitorSemanaPage() {
           <GradeSemana semana={semana} consulta />
         </>
       ) : null}
-      <span className="print:hidden w-fit">
-        <EditorNavButton to="/leitor">Voltar</EditorNavButton>
+      <span className="print:hidden">
+        <EditorNavButton to="/leitor/semanas" className="w-full">
+          Voltar
+        </EditorNavButton>
       </span>
     </section>
   )
