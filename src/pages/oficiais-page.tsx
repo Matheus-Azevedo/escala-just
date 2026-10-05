@@ -1,4 +1,4 @@
-import { type FormEvent, useEffect, useState } from 'react'
+import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { editorNavHover, EditorNavButton } from '@/components/editor-menu'
@@ -28,6 +28,12 @@ export function OficiaisPage() {
   const [aRemoverId, setARemoverId] = useState<string | null>(null)
   const [listaPronta, setListaPronta] = useState(false)
   const [mostrarEsqueleto, setMostrarEsqueleto] = useState(false)
+  const formRef = useRef<HTMLFormElement>(null)
+
+  function rolarParaFormulario() {
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    formRef.current?.querySelector<HTMLInputElement>('#oficial-nome')?.focus({ preventScroll: true })
+  }
 
   async function recarregar() {
     setOficiais(await servico.listar())
@@ -121,7 +127,11 @@ export function OficiaisPage() {
         Até 30 na rotação. Quem está fora da escala não conta nesse teto.
       </p>
 
-      <form className="flex flex-col gap-3 rounded-lg border p-3" onSubmit={onSubmit}>
+      <form
+        ref={formRef}
+        className="flex flex-col gap-3 rounded-lg border p-3"
+        onSubmit={onSubmit}
+      >
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="oficial-nome">Nome</Label>
           <Input
@@ -200,6 +210,7 @@ export function OficiaisPage() {
                     setEditandoId(oficial.id)
                     setNome(oficial.nome)
                     setForaDaRotacao(oficial.foraDaRotacao)
+                    rolarParaFormulario()
                   }}
                 >
                   Editar
