@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+import { editorNavHover } from '@/components/editor-menu'
 import { Button } from '@/components/ui/button'
 
 type BeforeInstallPromptEvent = Event & {
@@ -32,7 +33,7 @@ export function AtalhoPwa() {
       <Button
         type="button"
         variant="outline"
-        className="w-full"
+        className={`w-full ${editorNavHover}`}
         onClick={() => {
           void evento.prompt()
         }}
