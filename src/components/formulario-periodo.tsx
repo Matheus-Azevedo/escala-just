@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from 'react'
 import { toast } from 'sonner'
 
+import { AjudaFuncao } from '@/components/ajuda-funcao'
 import { EscolhaModoRotacao } from '@/components/escolha-modo-rotacao'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -183,7 +184,10 @@ export function FormularioPeriodo({
         ajuste a célula. Recalcular remonta uma semana.
       </p>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="periodo-tipo">Recorte</Label>
+        <div className="flex items-center gap-1">
+          <Label htmlFor="periodo-tipo">Recorte</Label>
+          <AjudaFuncao texto="Cria ou gera várias semanas do mês ou do ano; não mexe numa semana já preenchida ao gerar." />
+        </div>
         <select
           id="periodo-tipo"
           className={campoControloClass}

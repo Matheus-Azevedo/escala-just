@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import { AjudaFuncao } from '@/components/ajuda-funcao'
 import { CampoData } from '@/components/campo-data'
 import { editorNavHover, EditorNavButton } from '@/components/editor-menu'
 import { Button } from '@/components/ui/button'
@@ -126,7 +127,10 @@ export function AusenciasPage() {
 
   return (
     <section className="mx-auto flex w-full max-w-2xl flex-col gap-4">
-      <h2 className="text-xl font-semibold">Ausências</h2>
+      <div className="flex items-center gap-1">
+        <h2 className="text-xl font-semibold">Ausências</h2>
+        <AjudaFuncao texto="Marca quem não entra na escala num intervalo; não troca duas pessoas entre si." />
+      </div>
       <p className="text-sm text-muted-foreground">
         Férias, doença ou outro. Estes períodos entram na geração da grade.
       </p>
@@ -197,20 +201,19 @@ export function AusenciasPage() {
             onChange={setDataFim}
           />
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="submit"
-            pending={aGravar}
-            disabled={ocupado || !oficialId || !dataInicio || !dataFim}
-          >
-            {editandoId ? 'Guardar' : 'Adicionar'}
+        <Button
+          type="submit"
+          className="w-full"
+          pending={aGravar}
+          disabled={ocupado || !oficialId || !dataInicio || !dataFim}
+        >
+          {editandoId ? 'Guardar' : 'Adicionar'}
+        </Button>
+        {editandoId ? (
+          <Button type="button" variant="outline" className={`w-full ${editorNavHover}`} onClick={limparFormulario}>
+            Cancelar
           </Button>
-          {editandoId ? (
-            <Button type="button" variant="outline" className={editorNavHover} onClick={limparFormulario}>
-              Cancelar
-            </Button>
-          ) : null}
-        </div>
+        ) : null}
       </form>
 
       {!listaPronta && mostrarEsqueleto ? (

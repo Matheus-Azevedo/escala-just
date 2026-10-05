@@ -1,3 +1,4 @@
+import { AjudaFuncao } from '@/components/ajuda-funcao'
 import { EscolhaModoRotacao } from '@/components/escolha-modo-rotacao'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,7 +18,10 @@ function CamposAncora({
   return (
     <>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="semana-ancora-titular">Âncora dos titulares</Label>
+        <div className="flex items-center gap-1">
+          <Label htmlFor="semana-ancora-titular">Âncora dos titulares</Label>
+          <AjudaFuncao texto="Escolhe por onde a fila de titulares começa nesta semana." />
+        </div>
         <Input
           id="semana-ancora-titular"
           type="number"
@@ -28,7 +32,10 @@ function CamposAncora({
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="semana-ancora-suplente">Âncora dos suplentes</Label>
+        <div className="flex items-center gap-1">
+          <Label htmlFor="semana-ancora-suplente">Âncora dos suplentes</Label>
+          <AjudaFuncao texto="Escolhe por onde a fila de suplentes começa nesta semana." />
+        </div>
         <Input
           id="semana-ancora-suplente"
           type="number"

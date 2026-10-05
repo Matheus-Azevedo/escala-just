@@ -2,6 +2,7 @@ import { type FormEvent, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 
+import { AjudaFuncao } from '@/components/ajuda-funcao'
 import { CampoData } from '@/components/campo-data'
 import { EditorNavButton } from '@/components/editor-menu'
 import { EscolhaModoRotacao } from '@/components/escolha-modo-rotacao'
@@ -203,6 +204,7 @@ export function SemanasListaPage() {
             onCheckedChange={(value) => setContinuar(value === true)}
           />
           <Label htmlFor="semana-continuar">Continuar da semana anterior</Label>
+          <AjudaFuncao texto="Copia a ordem da rotação da semana anterior; não copia as células." />
         </div>
         {continuar ? (
           <p className="text-sm text-muted-foreground">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import { AjudaFuncao } from '@/components/ajuda-funcao'
 import { EditorNavButton } from '@/components/editor-menu'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSemanasService } from '@/hooks/semanas-context'
@@ -50,7 +51,10 @@ export function HistoricoPage() {
 
   return (
     <section className="mx-auto flex w-full max-w-2xl flex-col gap-4">
-      <h2 className="text-xl font-semibold">Histórico</h2>
+      <div className="flex items-center gap-1">
+        <h2 className="text-xl font-semibold">Histórico</h2>
+        <AjudaFuncao texto="Lista semanas cuja sexta já passou; daqui não se edita a grade." />
+      </div>
       <p className="text-sm text-muted-foreground">
         Escalas cuja sexta já terminou. Só leitura.
       </p>

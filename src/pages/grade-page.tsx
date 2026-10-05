@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
+import { AjudaFuncao } from '@/components/ajuda-funcao'
 import { editorNavHover } from '@/components/editor-menu'
 import { Button } from '@/components/ui/button'
 import { campoControloClass } from '@/components/ui/input'
@@ -247,6 +248,13 @@ export function GradeSemana({
             >
               {celulas.length > 0 ? 'Recalcular' : 'Gerar'}
             </Button>
+            <AjudaFuncao
+              texto={
+                celulas.length > 0
+                  ? 'Recalcular refaz a grade inteira e apaga os ajustes manuais desta semana.'
+                  : 'Gerar preenche a grade desta semana com a rotação e as ausências.'
+              }
+            />
             <Button
               type="button"
               variant="outline"
@@ -279,13 +287,23 @@ export function GradeSemana({
         >
           Exportar PDF
         </Button>
+        {!consulta ? (
+          <AjudaFuncao texto="Descarrega a escala neste aparelho; não altera o que está gravado." />
+        ) : null}
       </div>
 
       <div className="overflow-x-auto rounded-lg border">
         <table className="w-full min-w-[40rem] text-left text-sm">
           <thead>
             <tr className="border-b">
-              <th className="px-2 py-2 font-medium">Vaga</th>
+              <th className="px-2 py-2 font-medium">
+                <span className="inline-flex items-center gap-1">
+                  Vaga
+                  {!consulta ? (
+                    <AjudaFuncao texto="No editor, o nome de cada dia troca o oficial daquela célula sem refazer a semana." />
+                  ) : null}
+                </span>
+              </th>
               {dias.map((dia) => (
                 <th key={dia} className="px-2 py-2 font-medium">
                   {formatarDiaBr(dia)}
